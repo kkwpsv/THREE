@@ -279,7 +279,8 @@ namespace THREE
 
             parameters.Add("vertexColors", material.VertexColors);
 
-            parameters.Add("vertexAlphas", material.VertexColors && object3D.Geometry != null && object3D.Geometry is BufferGeometry && (object3D.Geometry as BufferGeometry).Attributes["color"] != null && ((object3D.Geometry as BufferGeometry).Attributes["color"] as IGLAttribute).ItemSize == 4);
+            bool vertexAlphas = material.VertexColors && object3D.Geometry != null && object3D.Geometry is BufferGeometry && (object3D.Geometry as BufferGeometry).Attributes.ContainsKey("color") && (object3D.Geometry as BufferGeometry).Attributes["color"] != null && ((object3D.Geometry as BufferGeometry).Attributes["color"] as IBufferAttribute).ItemSize == 4;
+            parameters.Add("vertexAlphas", vertexAlphas);
 
             parameters.Add("vertexUvs", material.Map != null || material.BumpMap != null || material.NormalMap != null || material.SpecularMap != null || material.AlphaMap != null || material.EmissiveMap != null || material.RoughnessMap != null || material.MetalnessMap != null || material.ClearcoatNormalMap != null);
 

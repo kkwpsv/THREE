@@ -449,7 +449,7 @@ namespace THREE
                 bool runnable = true;
                 bool haveDiagnostics = true;
                 int linkStatus;
-                gl.GetProgram((uint)program, GLEnum.ValidateStatus, out linkStatus);
+                gl.GetProgram((uint)program, GLEnum.LinkStatus, out linkStatus);
                 if (linkStatus == 0)
                 {
                     runnable = false;
