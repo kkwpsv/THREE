@@ -9,6 +9,7 @@ using Silk.NET.OpenGLES;
 using Silk.NET.OpenGLES.Extensions.ImGui;
 using Silk.NET.Windowing;
 using THREE.Silk;
+using THREESilkExample;
 namespace THREE.Silk.Example
 {
     [Serializable]
@@ -24,11 +25,12 @@ namespace THREE.Silk.Example
 
         protected readonly Stopwatch stopWatch = new Stopwatch();
         public bool ImWantMouse => ImGui.GetIO().WantCaptureMouse;
-        public bool ImWantKeyboard =>ImGui.GetIO().WantCaptureKeyboard;
-        public IWindow glControl;
-        public int Width => glControl.Size.X;
-        public int Height => glControl.Size.Y;
-        public float AspectRatio => (float)glControl.Size.X / (float)glControl.Size.Y;
+        public bool ImWantKeyboard => ImGui.GetIO().WantCaptureKeyboard;
+
+        private IView? _control;
+        public int Width => _control.Size.X;
+        public int Height => _control.Size.Y;
+        public float AspectRatio => (float)Width / Height;
 
 
 
@@ -45,14 +47,13 @@ namespace THREE.Silk.Example
             this.Dispose(false);
         }
 
-        public virtual void Load(IWindow control)
+        public virtual void Load(IView control)
         {
             Debug.Assert(null != control);
-            glControl = control;
 
+            _control = control;
             this.renderer.Width = control.Size.X;
             this.renderer.Height = control.Size.Y;
-            this.renderer.Context = control;
             this.renderer.gl = GL.GetApi(control);
             this.renderer.Init();
 
@@ -60,9 +61,11 @@ namespace THREE.Silk.Example
 
             stopWatch.Start();
         }
+
+
         public override Rectangle GetClientRectangle()
         {
-            return new Rectangle(0,0,renderer.Width,renderer.Height);
+            return new Rectangle(0, 0, renderer.Width, renderer.Height);
         }
         public virtual void InitCamera()
         {

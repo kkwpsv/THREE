@@ -3,8 +3,8 @@ using THREE.Silk;
 using Color = THREE.Color;
 namespace THREE.Silk.Example
 {
-    [Example("09-Sprites",ExampleCategory.LearnThreeJS,"Chapter07")]
-    public class SpritesExample1 :Example
+    [Example("09-Sprites", ExampleCategory.LearnThreeJS, "Chapter07")]
+    public class SpritesExample1 : Example
     {
         public Scene sceneOrtho;
 
@@ -33,48 +33,39 @@ namespace THREE.Silk.Example
 
             renderer.SetClearColor(0x000000);
             sceneOrtho = new Scene();
-          
+
 
             cameraOrtho = new OrthographicCamera();
 
 
-            var material = new MeshNormalMaterial() { Transparent = true, Opacity = 0.6f }; 
+            var material = new MeshNormalMaterial() { Transparent = true, Opacity = 0.6f };
 
             var geom = new SphereGeometry(15, 20, 20);
 
             var mesh = new Mesh(geom, material);
-            
+
             scene.Add(mesh);
 
             var texture = TextureLoader.Load(@"../../../../assets/textures/particles/sprite-sheet.png");
 
             CreateSprite(150, true, 0.6f, Color.Hex(0xffffff), sprite, texture);
-              
+
         }
 
         public override void Render()
         {
-           
-            
-            if (this.glControl!=null)
+            if ((cameraOrtho as OrthographicCamera).CameraRight == 1 && Width != 0)
             {
-                if ((cameraOrtho as OrthographicCamera).CameraRight == 1 && Width!=0)
-                {
-                    (cameraOrtho as OrthographicCamera).CameraRight = (float)Width;
-                    (cameraOrtho as OrthographicCamera).Top = (float)Height;
-                    (cameraOrtho as OrthographicCamera).Left = 0;
-                    (cameraOrtho as OrthographicCamera).Bottom = 0;
-                    (cameraOrtho as OrthographicCamera).Near = -10;
-                    (cameraOrtho as OrthographicCamera).Far = 10;
+                (cameraOrtho as OrthographicCamera).CameraRight = (float)Width;
+                (cameraOrtho as OrthographicCamera).Top = (float)Height;
+                (cameraOrtho as OrthographicCamera).Left = 0;
+                (cameraOrtho as OrthographicCamera).Bottom = 0;
+                (cameraOrtho as OrthographicCamera).Near = -10;
+                (cameraOrtho as OrthographicCamera).Far = 10;
 
-                    (cameraOrtho as OrthographicCamera).View.Enabled = false;
+                (cameraOrtho as OrthographicCamera).View.Enabled = false;
 
-                    (cameraOrtho as OrthographicCamera).UpdateProjectionMatrix();
-                }
-            }
-            else
-            {
-                return;
+                (cameraOrtho as OrthographicCamera).UpdateProjectionMatrix();
             }
 
             step += 0.01f;
@@ -101,7 +92,7 @@ namespace THREE.Silk.Example
                     }
                 }
             });
-            renderer.Render(sceneOrtho,cameraOrtho);
+            renderer.Render(sceneOrtho, cameraOrtho);
             renderer.AutoClear = false;
             renderer.Render(scene, camera);
             renderer.AutoClear = true;
@@ -115,13 +106,14 @@ namespace THREE.Silk.Example
 
             }
         }
-        private void CreateSprite(float size,bool transparent,float opacity,Color color,int spriteNumber,Texture texture)
+        private void CreateSprite(float size, bool transparent, float opacity, Color color, int spriteNumber, Texture texture)
         {
-            var spriteMaterial = new SpriteMaterial(){
-                Opacity= opacity,
-                Color= color,
-                Transparent= transparent,
-                Map= texture
+            var spriteMaterial = new SpriteMaterial()
+            {
+                Opacity = opacity,
+                Color = color,
+                Transparent = transparent,
+                Map = texture
             };
 
             // we have 1 row, with five sprites
@@ -130,7 +122,7 @@ namespace THREE.Silk.Example
             spriteMaterial.Blending = Constants.AdditiveBlending;
             // make sure the object is always rendered at the front
             spriteMaterial.DepthTest = false;
-            
+
             var sprite = new ParticleSprite(spriteMaterial);
             sprite.Scale.Set(size, size, size);
             sprite.Position.Set(100, 50, -10);

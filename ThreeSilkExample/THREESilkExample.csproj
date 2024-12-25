@@ -59,6 +59,10 @@
     <Compile Include="ThreeJs\Interactive\InteractiveCubesExample.cs" />
   </ItemGroup>
 
+    <ItemGroup>
+    <PackageReference Include="Silk.NET.OpenGLES.Extensions.ImGui" Version="2.21.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\THREE.Silk\THREE.Silk.csproj" />
     <ProjectReference Include="..\THREE\THREE.csproj" />

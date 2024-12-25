@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SilkAvaloniaDemo": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

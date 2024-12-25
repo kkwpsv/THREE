@@ -13,7 +13,7 @@ namespace THREE
     {
         public GL gl { get; set; }
         public bool IsGL2 { get; set; }
-        
+
         public IWindow Context;
 
         private GLRenderState CurrentRenderState;
@@ -217,6 +217,8 @@ namespace THREE
             }
         }
 
+        public uint DefaultFrameBuffer { get; set; } = 0;
+
         #endregion
 
         #region constructor
@@ -225,11 +227,9 @@ namespace THREE
 
         }
 
-        public GLRenderer(IWindow context, int width, int height) : this()
+        public GLRenderer(GL gl, int width, int height) : this()
         {
-            this.Context = context;
-            
-            gl = GL.GetApi(context);
+            this.gl = gl;
 
             this._viewport = new Vector4(0, 0, width, height);
             this.Width = width;
@@ -336,7 +336,7 @@ namespace THREE
 
             //Extensions.Get("OES_texture_float_linear");
             this.utils = new GLUtils(extensions, capabilities);
-            this.state = new GLState(gl,extensions, utils, capabilities);
+            this.state = new GLState(gl, extensions, utils, capabilities);
             this._currentScissor = (_scissor * _pixelRatio).Floor();
             this._currentViewport = (_viewport * _pixelRatio).Floor();
 
@@ -347,7 +347,7 @@ namespace THREE
 
             this.properties = new GLProperties(gl);
 
-            this.textures = new GLTextures(gl,extensions, state, properties, capabilities, utils, info);
+            this.textures = new GLTextures(gl, extensions, state, properties, capabilities, utils, info);
 
             this.attributes = new GLAttributes(gl);
 
@@ -424,9 +424,9 @@ namespace THREE
             //if (!this.Context.IsDisposed && this.Context.IsCurrent)
             //{
 
-                ReleaseMaterialProgramReference(material);
+            ReleaseMaterialProgramReference(material);
 
-                properties.Remove(material);
+            properties.Remove(material);
 
             //}
 
@@ -444,7 +444,7 @@ namespace THREE
             }
 
         }
-#endregion
+        #endregion
 
         #region Buffer Rendering
         private void RenderObjectImmediate(Object3D object3D, GLProgram program)
@@ -791,7 +791,7 @@ namespace THREE
             var transparentObjects = CurrentRenderList.Transparent;
 
             if (opaqueObjects.Count > 0) RenderObjects(opaqueObjects, scene, camera);
-            if(transmissionObjects.Count>0) RenderTransmissiveObjects(opaqueObjects,transmissionObjects,scene, camera);
+            if (transmissionObjects.Count > 0) RenderTransmissiveObjects(opaqueObjects, transmissionObjects, scene, camera);
             if (transparentObjects.Count > 0) RenderObjects(transparentObjects, scene, camera);
 
             if (scene.OnAfterRender != null)
@@ -828,7 +828,7 @@ namespace THREE
             _currentCamera = null;
 
             renderStateStack.Pop();
-            if(renderStateStack.Count>0)
+            if (renderStateStack.Count > 0)
             {
                 //CurrentRenderState = renderStateStack.ElementAt(renderStateStack.Count-1);
                 CurrentRenderState = renderStateStack.Last();
@@ -966,9 +966,9 @@ namespace THREE
             }
         }
 
-        private void RenderTransmissiveObjects(List<RenderItem> opaqueObjects,List<RenderItem> transmissiveObjects, Object3D scene, Camera camera)
+        private void RenderTransmissiveObjects(List<RenderItem> opaqueObjects, List<RenderItem> transmissiveObjects, Object3D scene, Camera camera)
         {
-            if(_transmissionRenderTarget==null)
+            if (_transmissionRenderTarget == null)
             {
                 _transmissionRenderTarget = new GLRenderTarget(1024, 1024, new Hashtable()
                 {
@@ -1072,7 +1072,7 @@ namespace THREE
 
         }
 
-#endregion
+        #endregion
         private GLProgram GetProgram(Material material, Object3D scene, Object3D object3D)
         {
             if (scene is not Scene) scene = emptyScene;
@@ -1104,9 +1104,9 @@ namespace THREE
             }
 
             GLProgram program = programs.ContainsKey(programCacheKey) ? (GLProgram)programs[programCacheKey] : null;
-            if(program!=null)
+            if (program != null)
             {
-                if(materialProperties.ContainsKey("currentProgram") && (GLProgram)materialProperties["currentProgram"] == program &&
+                if (materialProperties.ContainsKey("currentProgram") && (GLProgram)materialProperties["currentProgram"] == program &&
                     materialProperties.ContainsKey("lightsStateVersion") && (int)materialProperties["lightsStateVersion"] == lightsStateVersion)
                 {
                     UpdateCommonMaterialProperties(material, parameters);
@@ -1130,9 +1130,9 @@ namespace THREE
                 uniforms["clippingPlanes"] = _clipping.uniform;
             }
 
-            UpdateCommonMaterialProperties (material, parameters);
+            UpdateCommonMaterialProperties(material, parameters);
             materialProperties["needsLights"] = MaterialNeedsLights(material);
-            materialProperties["lightsStateVersion"] = lightsStateVersion;                       
+            materialProperties["lightsStateVersion"] = lightsStateVersion;
 
             if ((bool)materialProperties["needsLights"])
             {
@@ -1186,12 +1186,6 @@ namespace THREE
             target.Copy(_currentViewport);
 
             return target;
-        }
-
-        public virtual void SetGraphicsContext(IWindow context, int width, int height)
-        {
-            Context = context;
-            Resize(width, height);
         }
 
         public virtual void Resize(int width, int height)
@@ -1278,7 +1272,7 @@ namespace THREE
             if (_currentFramebuffer != framebuffer)
             {
 
-                gl.BindFramebuffer(GLEnum.Framebuffer, framebuffer == null ? 0 : (uint)framebuffer);
+                gl.BindFramebuffer(GLEnum.Framebuffer, framebuffer == null ? DefaultFrameBuffer : (uint)framebuffer);
                 _currentFramebuffer = framebuffer;
 
             }
@@ -1413,7 +1407,7 @@ namespace THREE
             var containsColor = isBufferGeometry && (geometry as BufferGeometry).Attributes.ContainsKey("color");
             var colorAttribute = containsColor ? (geometry as BufferGeometry).Attributes["color"] : null;
             var ItemSize = containsColor && colorAttribute is BufferAttribute<float> ? (colorAttribute as BufferAttribute<float>).ItemSize : containsColor && colorAttribute is BufferAttribute<byte> ? (colorAttribute as BufferAttribute<byte>).ItemSize : 0;
-            var vertexAlphas = material.VertexColors == true && geometry!=null && isBufferGeometry && containsColor && ItemSize == 4;
+            var vertexAlphas = material.VertexColors == true && geometry != null && isBufferGeometry && containsColor && ItemSize == 4;
 
             //var vertexAlphas = material.VertexColors == true && object3D.Geometry!=null && object3D.Geometry is BufferGeometry && (object3D.Geometry as BufferGeometry).Attributes.ContainsKey("color")&&((object3D.Geometry as BufferGeometry).Attributes["color"] as BufferAttribute<float>).ItemSize == 4;
 
@@ -1502,7 +1496,7 @@ namespace THREE
 
                     needsProgramChange = true;
 
-                }              
+                }
             }
             else
             {
@@ -1513,7 +1507,7 @@ namespace THREE
             }
 
             GLProgram program = (GLProgram)materialProperties["currentProgram"];
-            if(needsProgramChange)
+            if (needsProgramChange)
             {
                 program = GetProgram(material, scene, object3D);
             }
@@ -1561,7 +1555,7 @@ namespace THREE
             }
 
             // When resizeing, it always need to apply camera ProjectionMatrix
-            p_uniforms.SetProjectionMatrix(gl,camera.ProjectionMatrix);
+            p_uniforms.SetProjectionMatrix(gl, camera.ProjectionMatrix);
 
             if (refreshProgram || (_currentCamera != null && !_currentCamera.Equals(camera)))
             {
@@ -1644,7 +1638,7 @@ namespace THREE
                     if (capabilities.floatVertexTextures)
                     {
 
-                        if (skeleton.BoneTexture != null) skeleton.ComputeBoneTexture();                      
+                        if (skeleton.BoneTexture != null) skeleton.ComputeBoneTexture();
 
                         p_uniforms.SetValue("boneTexture", skeleton.BoneTexture, textures);
                         p_uniforms.SetValue("boneTextureSize", skeleton.BoneTextureSize);
@@ -1697,7 +1691,7 @@ namespace THREE
 
                 }
 
-                materials.RefreshMaterialUniforms(m_uniforms, material, _pixelRatio, this.Height,_transmissionRenderTarget);
+                materials.RefreshMaterialUniforms(m_uniforms, material, _pixelRatio, this.Height, _transmissionRenderTarget);
 
                 if (ShaderLib.UniformsLib.ContainsKey("ltc_1")) (m_uniforms["ltc_1"] as GLUniform)["value"] = ShaderLib.UniformsLib["LTC_1"];
                 if (ShaderLib.UniformsLib.ContainsKey("ltc_2")) (m_uniforms["ltc_2"] as GLUniform)["value"] = ShaderLib.UniformsLib["LTC_2"];
@@ -1709,7 +1703,7 @@ namespace THREE
             if (material is ShaderMaterial && (material as ShaderMaterial).UniformsNeedUpdate == true)
             {
 
-                GLUniformsLoader.Upload(gl,(List<GLUniform>)materialProperties["uniformsList"], m_uniforms, textures);
+                GLUniformsLoader.Upload(gl, (List<GLUniform>)materialProperties["uniformsList"], m_uniforms, textures);
                 (material as ShaderMaterial).UniformsNeedUpdate = false;
 
             }
@@ -1792,8 +1786,8 @@ namespace THREE
             gl.FrontFace(FrontFaceDirection.Ccw);
 
             gl.PolygonOffset(0, 0);
-           
-            gl.ActiveTexture(TextureUnit.Texture0);                       
+
+            gl.ActiveTexture(TextureUnit.Texture0);
 
             gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
