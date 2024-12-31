@@ -155,6 +155,7 @@ namespace THREE
         yellowgreen = 0x9acd32,
 
     }
+
     [Serializable]
     public struct HSL
     {
@@ -165,37 +166,29 @@ namespace THREE
         public float L;
 
     }
+
     [Serializable]
     public struct Color
     {
-        public float R;
+        public float R { get; set; }
 
-        public float G;
+        public float G { get; set; }
 
-        public float B;
+        public float B { get; set; }
 
 
         public Color(int hex)
         {
-            hex = (int)System.Math.Floor((Decimal)hex);
-
-            this.R = (hex >> 16 & 255) / 255f;
-            this.G = (hex >> 8 & 255) / 255f;
-            this.B = (hex & 255) / 255f;
+            R = (hex >> 16 & 255) / 255f;
+            G = (hex >> 8 & 255) / 255f;
+            B = (hex & 255) / 255f;
         }
-        public Color(float r, float? g = null, float? b = null)
+
+        public Color(float r, float g, float b)
         {
-            R = 0;
-            G = 0;
-            B = 0;
-            if (g == null && b == null)
-            {
-                Set((int)r);
-            }
-            else
-            {
-                SetRGB(r, g.Value, b.Value);
-            }
+            R = r;
+            G = g;
+            B = b;
         }
 
         public float Hue2RGB(float p, float q, float t)
@@ -232,53 +225,46 @@ namespace THREE
 
             return this;
         }
+
         public Color SetScalar(float scalar)
         {
-
-            this.R = scalar;
-            this.G = scalar;
-            this.B = scalar;
-
+            R = scalar;
+            G = scalar;
+            B = scalar;
             return this;
         }
+
         public static Color Hex(int hex)
         {
-            hex = (int)System.Math.Floor((Decimal)hex);
-
-
             var R = (hex >> 16 & 255) / 255f;
             var G = (hex >> 8 & 255) / 255f;
             var B = (hex & 255) / 255f;
-
             return new Color(R, G, B);
         }
+
         public Color SetHex(int hex)
         {
-
-            hex = (int)System.Math.Floor((Decimal)hex);
-
-            this.R = (hex >> 16 & 255) / 255f;
-            this.G = (hex >> 8 & 255) / 255f;
-            this.B = (hex & 255) / 255f;
-
+            R = (hex >> 16 & 255) / 255f;
+            G = (hex >> 8 & 255) / 255f;
+            B = (hex & 255) / 255f;
             return this;
         }
+
         public Color SetRGB(float r, float g, float b)
         {
-
-            this.R = r;
-            this.G = g;
-            this.B = b;
-
+            R = r;
+            G = g;
+            B = b;
             return this;
         }
+
         public float EuclideanModulo(float n, float m)
         {
             return ((n % m) + m) % m;
         }
+
         public Color SetHSL(float h, float s, float l)
         {
-
             // h,s,l ranges are in 0.0 - 1.0
             h = EuclideanModulo(h, 1);
             s = s.Clamp(0, 1);
@@ -286,30 +272,24 @@ namespace THREE
 
             if (s == 0)
             {
-
-                this.R = this.G = this.B = l;
-
+                R = G = B = l;
             }
             else
             {
-
                 var p = l <= 0.5 ? l * (1 + s) : l + s - (l * s);
                 var q = (2 * l) - p;
 
-                this.R = Hue2RGB(q, p, h + 1.0f / 3.0f);
-                this.G = Hue2RGB(q, p, h);
-                this.B = Hue2RGB(q, p, h - 1.0f / 3.0f);
-
+                R = Hue2RGB(q, p, h + 1.0f / 3.0f);
+                G = Hue2RGB(q, p, h);
+                B = Hue2RGB(q, p, h - 1.0f / 3.0f);
             }
 
             return this;
         }
         public Color SetColorName(ColorKeywords style)
         {
-
             // color keywords
             var hex = (int)style;
-
             return SetHex(hex);
         }
 
@@ -320,20 +300,20 @@ namespace THREE
 
         public Color Copy(Color other)
         {
-            this.R = other.R;
-            this.G = other.G;
-            this.B = other.B;
+            R = other.R;
+            G = other.G;
+            B = other.B;
 
             return this;
         }
+
         public Color CopyGammaToLinear(Color color, float? gammaFactor)
         {
+            gammaFactor ??= 2.0f;
 
-            if (gammaFactor == null) gammaFactor = 2.0f;
-
-            this.R = (float)Math.Pow(color.R, gammaFactor.Value);
-            this.G = (float)Math.Pow(color.G, gammaFactor.Value);
-            this.B = (float)Math.Pow(color.B, gammaFactor.Value);
+            R = (float)Math.Pow(color.R, gammaFactor.Value);
+            G = (float)Math.Pow(color.G, gammaFactor.Value);
+            B = (float)Math.Pow(color.B, gammaFactor.Value);
 
             return this;
 
@@ -341,97 +321,73 @@ namespace THREE
 
         public Color CopyLinearToGamma(Color color, float? gammaFactor)
         {
-
-            if (gammaFactor == null) gammaFactor = 2.0f;
+            gammaFactor ??= 2.0f;
 
             var safeInverse = (gammaFactor > 0) ? (1.0f / gammaFactor) : 1.0f;
 
-            this.R = (float)Math.Pow(color.R, (float)safeInverse);
-            this.G = (float)Math.Pow(color.G, (float)safeInverse);
-            this.B = (float)Math.Pow(color.B, (float)safeInverse);
+            R = (float)Math.Pow(color.R, (float)safeInverse);
+            G = (float)Math.Pow(color.G, (float)safeInverse);
+            B = (float)Math.Pow(color.B, (float)safeInverse);
 
             return this;
-
         }
 
         public Color ConvertGammaToLinear(float? gammaFactor)
         {
-
-            return this.CopyGammaToLinear(this, gammaFactor);
-
+            return CopyGammaToLinear(this, gammaFactor);
         }
 
         public Color ConvertLinearToGamma(float? gammaFactor)
         {
-
-            this.CopyLinearToGamma(this, gammaFactor);
-
-            return this;
-
+            return CopyLinearToGamma(this, gammaFactor);
         }
 
         public Color CopySRGBToLinear(Color color)
         {
-
-            this.R = SRGBToLinear(color.R);
-            this.G = SRGBToLinear(color.G);
-            this.B = SRGBToLinear(color.B);
+            R = SRGBToLinear(color.R);
+            G = SRGBToLinear(color.G);
+            B = SRGBToLinear(color.B);
 
             return this;
-
         }
 
         public Color CopyLinearToSRGB(Color color)
         {
-
-            this.R = LinearToSRGB(color.R);
-            this.G = LinearToSRGB(color.G);
-            this.B = LinearToSRGB(color.B);
+            R = LinearToSRGB(color.R);
+            G = LinearToSRGB(color.G);
+            B = LinearToSRGB(color.B);
 
             return this;
         }
 
         public Color ConvertSRGBToLinear()
         {
-
-            this.CopySRGBToLinear(this);
-
-            return this;
-
+            return CopySRGBToLinear(this);
         }
 
         public Color ConvertLinearToSRGB()
         {
-
-            this.CopyLinearToSRGB(this);
-
-            return this;
-
+            return CopyLinearToSRGB(this);
         }
 
         public int GetHex()
         {
-
-            return (int)(this.R * 255) << 16 ^ (int)(this.G * 255) << 8 ^ (int)(this.B * 255) << 0;
-
+            return (int)(R * 255) << 16 ^ (int)(G * 255) << 8 ^ (int)(B * 255) << 0;
         }
 
         public string GetHexString()
         {
             var id = GetHex();
-
             return "#" + id.ToString("X6");
-
         }
 
         public HSL GetHSL()
         {
-
             // h,s,l ranges are in 0.0 - 1.0
 
-            var r = this.R;
-            var g = this.G;
-            var b = this.B;
+            var r = R;
+            var g = G;
+            var b = B;
 
             var max = Math.Max(r, Math.Max(g, b));
             var min = Math.Min(r, Math.Min(g, b));
@@ -441,14 +397,11 @@ namespace THREE
 
             if (min == max)
             {
-
                 hue = 0;
                 saturation = 0;
-
             }
             else
             {
-
                 var delta = max - min;
 
                 saturation = lightness <= 0.5 ? delta / (max + min) : delta / (2 - max - min);
@@ -467,7 +420,6 @@ namespace THREE
                 }
 
                 hue /= 6;
-
             }
 
             HSL target = new HSL();
@@ -476,65 +428,51 @@ namespace THREE
             target.L = lightness;
 
             return target;
-
         }
 
         public Color OffsetHSL(float h, float s, float l)
         {
+            HSL hslA = GetHSL();
 
-            HSL _hslA = this.GetHSL();
+            hslA.H += h; hslA.S += s; hslA.L += l;
 
-            this.GetHSL();
-
-            _hslA.H += h; _hslA.S += s; _hslA.L += l;
-
-            this.SetHSL(_hslA.H, _hslA.S, _hslA.L);
-
-            return this;
+            return SetHSL(hslA.H, hslA.S, hslA.L);
         }
 
         public Color Add(Color color)
         {
-
-            this.R += color.R;
-            this.G += color.G;
-            this.B += color.B;
+            R += color.R;
+            G += color.G;
+            B += color.B;
 
             return this;
-
         }
 
         public Color AddColors(Color color1, Color color2)
         {
-
-            this.R = color1.R + color2.R;
-            this.G = color1.G + color2.G;
-            this.B = color1.B + color2.B;
+            R = color1.R + color2.R;
+            G = color1.G + color2.G;
+            B = color1.B + color2.B;
 
             return this;
-
         }
 
         public Color AddScalar(float s)
         {
-
-            this.R += s;
-            this.G += s;
-            this.B += s;
+            R += s;
+            G += s;
+            B += s;
 
             return this;
-
         }
 
         public Color Sub(Color color)
         {
-
-            this.R = Math.Max(0, this.R - color.R);
-            this.G = Math.Max(0, this.G - color.G);
-            this.B = Math.Max(0, this.B - color.B);
+            R = Math.Max(0, this.R - color.R);
+            G = Math.Max(0, this.G - color.G);
+            B = Math.Max(0, this.B - color.B);
 
             return this;
-
         }
 
         public static Color operator -(Color left, Color right)
@@ -549,13 +487,11 @@ namespace THREE
 
         public Color Multiply(Color color)
         {
-
-            this.R *= color.R;
-            this.G *= color.G;
-            this.B *= color.B;
+            R *= color.R;
+            G *= color.G;
+            B *= color.B;
 
             return this;
-
         }
 
         public static Color operator *(Color left, Color right)
@@ -571,13 +507,11 @@ namespace THREE
 
         public Color MultiplyScalar(float s)
         {
-
-            this.R *= s;
-            this.G *= s;
-            this.B *= s;
+            R *= s;
+            G *= s;
+            B *= s;
 
             return this;
-
         }
 
         public static Color operator *(Color left, float s)
@@ -593,65 +527,52 @@ namespace THREE
 
         public Color Lerp(Color color, float alpha)
         {
-
-            this.R += (color.R - this.R) * alpha;
-            this.G += (color.G - this.G) * alpha;
-            this.B += (color.B - this.B) * alpha;
+            R += (color.R - this.R) * alpha;
+            G += (color.G - this.G) * alpha;
+            B += (color.B - this.B) * alpha;
 
             return this;
-
         }
 
         public Color LerpHSL(Color color, float alpha)
         {
-
             HSL _hslA = this.GetHSL();
             HSL _hslB = color.GetHSL();
-
 
             var h = _hslA.H.Lerp(_hslB.H, alpha);
             var s = _hslA.S.Lerp(_hslB.S, alpha);
             var l = _hslA.L.Lerp(_hslB.L, alpha);
 
-            this.SetHSL(h, s, l);
-
-            return this;
-
+            return SetHSL(h, s, l);
         }
 
         public bool Equals(Color c)
         {
-
-            return (c.R == this.R) && (c.G == this.G) && (c.B == this.B);
-
+            return (c.R == R) && (c.G == G) && (c.B == B);
         }
 
         public Color FromArray(float[] array, int? offset = null)
         {
-
-            if (offset == null) offset = 0;
+            offset ??= 0;
 
             int index = offset.Value;
-            this.R = array[index];
-            this.G = array[index + 1];
-            this.B = array[index + 2];
+            R = array[index];
+            G = array[index + 1];
+            B = array[index + 2];
 
             return this;
-
         }
 
         public float[] ToArray(float[] array, int? offset)
         {
-
-            if (array == null) array = new float[3];
-            if (offset == null) offset = 0;
+            array ??= new float[3];
+            offset ??= 0;
 
             array[(int)offset] = this.R;
             array[(int)offset + 1] = this.G;
             array[(int)offset + 2] = this.B;
 
             return array;
-
         }
 
     }
