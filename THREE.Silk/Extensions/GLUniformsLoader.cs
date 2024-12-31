@@ -18,8 +18,6 @@ namespace THREE
                 object v = (values[u.Id] as GLUniform)["value"];
                 if (v == null) continue;
 
-                var property = v.GetType().GetProperty("NeedsUpdate");
-
                 if (u.UniformKind.Equals("SingleUniform"))
                 {
 
