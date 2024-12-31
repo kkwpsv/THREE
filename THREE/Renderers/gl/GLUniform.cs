@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 namespace THREE
 {
     [Serializable]
+    [DebuggerDisplay("[GLUniform] {UniformKind} {Id}")]
     public class GLUniform : Dictionary<string, object>,ICloneable
     {
         public string Id { get; set; }
@@ -38,6 +39,6 @@ namespace THREE
         {
             return original.DeepCopy();
         }
-       
+
     }
 }
