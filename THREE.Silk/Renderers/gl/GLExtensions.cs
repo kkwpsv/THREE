@@ -6,18 +6,15 @@ namespace THREE
     [Serializable]
     public class GLExtensions
     {
-        public List<string> ExtensionsName = new List<string>();
-        public Dictionary<string, int> Extensions = new Dictionary<string, int>();
-        public GL gl;
+        public List<string> ExtensionsName { get; }
+        public Dictionary<string, int> Extensions { get; } = new Dictionary<string, int>();
+        public GL GL { get; }
+
         public GLExtensions(GL gl)
         {
-            this.gl = gl;
-            unsafe
-            {
-                var v = gl.GetString(GLEnum.Extensions);
-                string extensions = new string((char*)v);
-                ExtensionsName = new List<string>(extensions.Split(' '));
-            }
+            GL = gl;
+            var extensions = gl.GetStringS(GLEnum.Extensions);
+            ExtensionsName = new List<string>(extensions.Split(' '));
         }
 
         public int Get(string name)

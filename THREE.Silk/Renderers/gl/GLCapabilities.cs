@@ -54,7 +54,7 @@ namespace THREE
         public GLCapabilities(GLExtensions Extensions, ref GLCapabilitiesParameters parameters)
         {
             this.IsGL2 = Extensions.Get("GL_ARB_ES3_compatibility") > -1 ? true : false;
-            this.gl = Extensions.gl;
+            this.gl = Extensions.GL;
             //this.IsGL2 = false;
 
             this.Extensions = Extensions;
