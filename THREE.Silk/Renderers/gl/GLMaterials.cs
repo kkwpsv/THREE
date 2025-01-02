@@ -4,7 +4,7 @@ namespace THREE
 {
     [Serializable]
     public class GLMaterials
-    { 
+    {
         private GLProperties properties;
 
         public GLMaterials(GLProperties properties)
@@ -50,7 +50,7 @@ namespace THREE
             }
 
         }
-        public void RefreshMaterialUniforms(GLUniforms m_uniforms, Material material, float pixelRatio, float height,GLRenderTarget transmissionRenderTarget)
+        public void RefreshMaterialUniforms(GLUniforms m_uniforms, Material material, float pixelRatio, float height, GLRenderTarget transmissionRenderTarget)
         {
             if (material is MeshBasicMaterial)
             {
@@ -333,13 +333,13 @@ namespace THREE
                 }
 
             }
-            
+
             (uniforms["transmission"] as GLUniform)["value"] = material.Transmission;
 
-            if(material.Transmission > 0.0f)
+            if (material.Transmission > 0.0f)
             {
                 (uniforms["transmissionSamplerMap"] as GLUniform)["value"] = transmissionRenderTarget.Texture;
-                (uniforms["transmissionSamplerSize"] as GLUniform)["value"] = new Vector2(transmissionRenderTarget.Width,transmissionRenderTarget.Height);
+                (uniforms["transmissionSamplerSize"] as GLUniform)["value"] = new Vector2(transmissionRenderTarget.Width, transmissionRenderTarget.Height);
             }
 
             (uniforms["thickness"] as GLUniform)["value"] = material.Thickness;
@@ -635,13 +635,13 @@ namespace THREE
                 uvScaleMap = material.EmissiveMap;
 
             }
-            else if(material.ClearcoatMap!=null)
+            else if (material.ClearcoatMap != null)
             {
-                uvScaleMap= material.ClearcoatMap;
+                uvScaleMap = material.ClearcoatMap;
             }
             else if (material.ClearcoatNormalMap != null)
             {
-                uvScaleMap= material.ClearcoatNormalMap;
+                uvScaleMap = material.ClearcoatNormalMap;
             }
             else if (material.ClearcoatRoughnessMap != null)
             {
@@ -650,20 +650,9 @@ namespace THREE
 
             if (uvScaleMap != null)
             {
-
-                // backwards compatibility
-                if (uvScaleMap is GLRenderTarget)
-                {
-
-                    uvScaleMap = (uvScaleMap as GLRenderTarget).Texture;
-
-                }
-
                 if (uvScaleMap.MatrixAutoUpdate == true)
                 {
-
                     uvScaleMap.UpdateMatrix();
-
                 }
 
                 (uniforms["uvTransform"] as GLUniform)["value"] = uvScaleMap.Matrix;
@@ -671,22 +660,18 @@ namespace THREE
 
             Texture uv2ScaleMap = null;
 
-            if(material.AoMap != null)
+            if (material.AoMap != null)
             {
-                uv2ScaleMap= material.AoMap;
+                uv2ScaleMap = material.AoMap;
             }
-            else if(material.LightMap != null)
+            else if (material.LightMap != null)
             {
-                uv2ScaleMap= material.LightMap;
+                uv2ScaleMap = material.LightMap;
             }
-            
-            if(uv2ScaleMap != null)
+
+            if (uv2ScaleMap != null)
             {
-                if(uv2ScaleMap is GLRenderTarget)
-                {
-                    uv2ScaleMap = (uv2ScaleMap as GLRenderTarget).Texture;
-                }
-                if(uv2ScaleMap.MatrixAutoUpdate == true)
+                if (uv2ScaleMap.MatrixAutoUpdate == true)
                 {
                     uv2ScaleMap.UpdateMatrix();
                 }

@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using THREE.Textures;
 
 namespace THREE
 {
     [Serializable]
-    public class GLRenderTarget : Texture, ICloneable
+    public class GLRenderTarget : DisposableObject, ICloneable
     {
-        //protected static int RenderTargetIdCount;
-
         public bool IsGLMultiviewRenderTarget = false;
 
         public int NumViews = 0;
 
         public Texture Texture;
-
-        //public int Id = RenderTargetIdCount++;
-
-        //public Guid Uuid = Guid.NewGuid();
 
         public Hashtable Options;
 

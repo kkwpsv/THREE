@@ -136,11 +136,6 @@ namespace THREE
             {
                 encoding = map.Encoding;
             }
-            else if (map is GLRenderTarget)
-            {
-                //    Trace.TraceWarning("THREE.Renderers.gl.GLPrograms.GetTextureEncodingFromMap: don't use render targets as textures. Use their property instead.");
-                encoding = (map as GLRenderTarget).Texture.Encoding;
-            }
 
             return encoding;
         }

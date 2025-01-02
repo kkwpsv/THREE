@@ -1192,7 +1192,7 @@ namespace THREE
         public void UpdateRenderTargetMipmap(GLRenderTarget renderTarget)
         {
             var texture = renderTarget.Texture;
-            var supportsMips = IsPowerOfTwo(renderTarget.Image) || this.IsGL2;
+            var supportsMips = IsPowerOfTwo(renderTarget.Texture.Image) || this.IsGL2;
 
             if (TextureNeedsGenerateMipmaps(texture, supportsMips))
             {
@@ -1261,18 +1261,7 @@ namespace THREE
 
         public void SafeSetTextureCube(Texture texture, int slot)
         {
-            if (texture is GLCubeRenderTarget)
-            {
-                if (warnedTextureCube == false)
-                {
-                    Trace.TraceWarning("THREE.WebGLTextures.safeSetTextureCube: don't use cube render targets as textures. Use their .texture property instead.");
-                    warnedTextureCube = true;
-                }
-
-                texture = (texture as GLCubeRenderTarget).Texture;
-                SetTextureCubeDynamic(texture, slot);
-            }
-            else if (texture is CubeTexture cubeTexture)
+            if (texture is CubeTexture cubeTexture)
             {
                 SetTextureCube(cubeTexture, slot);
             }
