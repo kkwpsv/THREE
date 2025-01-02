@@ -799,5 +799,7 @@ namespace THREE
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        public override string ToString() => $"[{X},{Y},{Z}]";
     }
 }
