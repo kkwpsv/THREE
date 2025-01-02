@@ -1,15 +1,9 @@
 ﻿using Rhino.DocObjects;
 using Rhino.FileIO;
 using Rhino.Geometry;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using THREE;
-using SkiaSharp;
 using System.Diagnostics;
-using System.Linq;
-using System.IO;
+
 namespace THREE
 {
     //Intermediate Geometry between Three and Rhino

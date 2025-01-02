@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+﻿using THREE.Textures;
 
 namespace THREE
 {
@@ -130,20 +130,7 @@ namespace THREE
         public Texture CreateTexture()
         {
             Texture texture = new Texture();
-            SKBitmap bitmap = new SKBitmap(1, _n.Value);
-            texture.Image = bitmap;
-            texture.ImageSize.Width = 1;
-            texture.ImageSize.Height = _n.Value;
-            texture.Format = Constants.RGBAFormat;
-            texture.NeedsUpdate = true;
 
-            UpdateTexture(texture);
-
-            return texture;
-        }
-
-        public void UpdateTexture(Texture texture)
-        {
             byte[] data = new byte[4 * _n.Value];
 
             var k = 0;
@@ -173,7 +160,17 @@ namespace THREE
                     }
                 }
             }
-            texture.Image = data.ToSKBitMap(1, _n.Value);
+
+            texture.Image = new Image
+            {
+                Width = 1,
+                Height = _n.Value,
+                Data = data,
+            };
+            texture.Format = Constants.RGBAFormat;
+            texture.NeedsUpdate = true;
+
+            return texture;
         }
     }
 

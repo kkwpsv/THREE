@@ -1,8 +1,4 @@
-﻿using SkiaSharp;
-using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace THREE
 {
@@ -159,13 +155,20 @@ namespace THREE
             float[] boneMatrices = new float[size * size * 4]; // 4 floats per RGBA pixel
             Array.Copy(this.BoneMatrices, boneMatrices, this.BoneMatrices.Length); // copy current values
 
-            //Bitmap im = new Bitmap(size, size,size,System.Drawing.Imaging.PixelFormat.Format8bppIndexed,Marshal.UnsafeAddrOfPinnedArrayElement(ToByteArray(boneMatrices),0));
-            SKBitmap im = boneMatrices.ToByteArray().ToSKBitMap(size,size);
-            DataTexture boneTexture = new DataTexture(im, size, size, Constants.RGBAFormat, Constants.FloatType);
-            boneTexture.NeedsUpdate = true;
+            var boneTexture = new DataTexture
+            {
+                Image = new Textures.Image
+                {
+                    Width = size,
+                    Height = size,
+                    FloatData = boneMatrices,
+                },
+                NeedsUpdate = true,
+                Type = Constants.FloatType,
+            };
 
-            this.BoneMatrices = boneMatrices;
-            this.BoneTexture = boneTexture;
+            BoneMatrices = boneMatrices;
+            BoneTexture = boneTexture;
 
             return this;
 

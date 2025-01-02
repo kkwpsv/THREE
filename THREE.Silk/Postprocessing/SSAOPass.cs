@@ -67,10 +67,8 @@ namespace THREE
 
             // beauty render target with depth buffer
 
-            var depthTexture = new DepthTexture(0, 0, 0);
-            depthTexture.Type = Constants.UnsignedShortType;
-            depthTexture.MinFilter = Constants.NearestFilter;
-            depthTexture.MaxFilter = Constants.NearestFilter;
+            var depthTexture = new DepthTexture(0, 0, Constants.DepthStencilFormat);
+
 
             this.beautyRenderTarget = new GLRenderTarget(this.width, this.height, new Hashtable(){
                 { "minFilter", Constants.LinearFilter },
@@ -176,40 +174,36 @@ namespace THREE
             int width = 4;
             int height = 4;
 
-
             var simplex = new SimplexNoise();
 
             var size = width * height;
-            float[] data = new float[size * 4];
+            float[] data = new float[size];
 
             for (var i = 0; i < size; i++)
             {
-
-                var stride = i * 4;
-
                 float x = (float)(MathUtils.random.NextDouble() * 2) - 1;
                 float y = (float)(MathUtils.random.NextDouble() * 2) - 1;
                 var z = 0;
 
                 float noise = simplex.Noise3d(x, y, z);
 
-                data[stride] = noise;
-                data[stride + 1] = noise;
-                data[stride + 2] = noise;
-                data[stride + 3] = 1;
-
+                data[i] = noise;
             }
-            //Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            //BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            //IntPtr iptr = bitmapData.Scan0;
 
-            //Marshal.Copy(iptr, data, 0, data.Length);
-
-            //bitmap.UnlockBits(bitmapData);
-            var bitmap = data.ToByteArray().ToSKBitMap(width,height);
-            this.noiseTexture = new DataTexture(bitmap, width, height, Constants.RGBAFormat, Constants.FloatType);
-            this.noiseTexture.WrapS = Constants.RepeatWrapping;
-            this.noiseTexture.WrapT = Constants.RepeatWrapping;
+            noiseTexture = new DataTexture
+            {
+                Image = new Textures.Image
+                {
+                    Width = width,
+                    Height = height,
+                    FloatData = data,
+                },
+                Format = Constants.RedFormat,
+                Type = Constants.FloatType,
+                WrapS = Constants.RepeatWrapping,
+                WrapT = Constants.RepeatWrapping,
+                NeedsUpdate = true,
+            };
         }
 
         private void GenerateSampleKernel()

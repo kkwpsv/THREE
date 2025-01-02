@@ -1,16 +1,12 @@
 ﻿using Silk.NET.OpenGLES;
-using SkiaSharp;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
+using THREE.Textures;
 
 namespace THREE
 {
     [Serializable]
-    public class GLTextures : DisposableObject,IGLTextures
+    public class GLTextures : DisposableObject, IGLTextures
     {
         private bool IsGL2;
 
@@ -24,7 +20,7 @@ namespace THREE
 
         private GLRenderer renderer;
 
-        private GL gl ;
+        private GL gl;
         private Hashtable videoTextures = new Hashtable();
 
         private int textureUnits = 0;
@@ -67,38 +63,7 @@ namespace THREE
             this.info = info;
         }
 
-        private SKBitmap ResizeImage(SKBitmap image, int width, int height)
-        {
-            return image.Resize(new SKImageInfo(width,height), SKFilterQuality.High);
-            //var destRect = new Rectangle(0, 0, width, height);
-            //var destImage = new Bitmap(width, height);
-
-            //destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            //using (var graphics = Graphics.FromImage(destImage))
-            //{
-            //    graphics.CompositingMode = CompositingMode.SourceCopy;
-            //    graphics.CompositingQuality = CompositingQuality.HighQuality;
-            //    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            //    graphics.SmoothingMode = SmoothingMode.HighQuality;
-            //    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-            //    using (var wrapMode = new ImageAttributes())
-            //    {
-            //        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-            //        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-            //    }
-            //}
-
-            //return destImage;
-        }
-
-        //private Bitmap ResizeImage(Bitmap image, int width, int height)
-        //{
-        //    Size resize = new Size(width, height);
-        //    return new Bitmap(image, resize);
-        //}
-        private SKBitmap ResizeImage(SKBitmap image, bool needsPowerOfTwo, bool needsNewCanvas, int maxSize)
+        private Image ResizeImage(Image image, bool needsPowerOfTwo, bool needsNewCanvas, int maxSize)
         {
             float scale = 1.0f;
 
@@ -109,32 +74,17 @@ namespace THREE
                 scale = maxSize / (float)System.Math.Max(image.Width, image.Height);
             }
 
-            if (scale <= 1 || needsPowerOfTwo == true)
+            if (scale < 1 || needsPowerOfTwo == true)
             {
-                if (image is SKBitmap)
-                {
-                    var width = needsPowerOfTwo ? MathUtils.FloorPowerOfTwo(scale * image.Width) : (float)System.Math.Floor(scale * image.Width);
-                    var height = needsPowerOfTwo ? MathUtils.FloorPowerOfTwo(scale * image.Height) : (float)System.Math.Floor(scale * image.Height);
-
-
-                    image = ResizeImage(image, (int)width, (int)height);
-
-                    return image;
-
-                }
-                else
-                {
-                    return image;
-                }
+                throw new NotImplementedException("Resizing image does not implement yet.");
             }
             return image;
         }
 
-        private bool IsPowerOfTwo(SKBitmap image)
+        private bool IsPowerOfTwo(Image image)
         {
             if (image == null) return false;
             return MathUtils.IsPowerOfTwo(image.Width) && MathUtils.IsPowerOfTwo(image.Height);
-
         }
 
         private bool IsPowerOfTwo(GLRenderTarget image)
@@ -173,7 +123,7 @@ namespace THREE
                 textureProperties.Add("maxMipLevel", (int)value);
             }
         }
-        private int GetInternalFormat(string internalFormatName, int glFormat, int glType)
+        private GLEnum GetInternalFormat(string? internalFormatName, GLEnum glFormat, int glType)
         {
             if (IsGL2 == false) return glFormat;
 
@@ -185,44 +135,35 @@ namespace THREE
 
             var internalFormat = glFormat;
 
-            if (glFormat == (int)GLEnum.Red)
+            if (glFormat == GLEnum.Red)
             {
-                if (glType == (int)GLEnum.Float) internalFormat = (int)GLEnum.R32f;
-                if (glType == (int)GLEnum.HalfFloat) internalFormat = (int)GLEnum.R16f;
-                if (glType == (int)GLEnum.UnsignedByte) internalFormat = (int)GLEnum.R8;
-
+                if (glType == (int)GLEnum.Float) internalFormat = GLEnum.R32f;
+                if (glType == (int)GLEnum.HalfFloat) internalFormat = GLEnum.R16f;
+                if (glType == (int)GLEnum.UnsignedByte) internalFormat = GLEnum.R8;
             }
 
-            if (glFormat == (int)GLEnum.Rgb)
+            if (glFormat == GLEnum.Rgb)
             {
-
-                if (glType == (int)GLEnum.Float) internalFormat = (int)GLEnum.Rgb32f;
-                if (glType == (int)GLEnum.HalfFloat) internalFormat = (int)GLEnum.Rgb16f;
-                if (glType == (int)GLEnum.UnsignedByte) internalFormat = (int)GLEnum.Rgb8;
-
+                if (glType == (int)GLEnum.Float) internalFormat = GLEnum.Rgb32f;
+                if (glType == (int)GLEnum.HalfFloat) internalFormat = GLEnum.Rgb16f;
+                if (glType == (int)GLEnum.UnsignedByte) internalFormat = GLEnum.Rgb8;
             }
 
-            if (glFormat == (int)GLEnum.Rgba)
+            if (glFormat == GLEnum.Rgba)
             {
-
-                if (glType == (int)GLEnum.Float) internalFormat = (int)GLEnum.Rgba32f;
-                if (glType == (int)GLEnum.HalfFloat) internalFormat = (int)GLEnum.Rgba16f;
-                if (glType == (int)GLEnum.UnsignedByte) internalFormat = (int)GLEnum.Rgba8;
-
+                if (glType == (int)GLEnum.Float) internalFormat = GLEnum.Rgba32f;
+                if (glType == (int)GLEnum.HalfFloat) internalFormat = GLEnum.Rgba16f;
+                if (glType == (int)GLEnum.UnsignedByte) internalFormat = GLEnum.Rgba8;
             }
 
-            if (internalFormat == (int)GLEnum.R16f || internalFormat == (int)GLEnum.R32f ||
-                internalFormat == (int)GLEnum.Rgba16f || internalFormat == (int)GLEnum.Rgba32f)
+            if (internalFormat == GLEnum.R16f || internalFormat == GLEnum.R32f ||
+                internalFormat == GLEnum.Rgba16f || internalFormat == GLEnum.Rgba32f)
             {
-
                 extensions.Get("EXT_color_buffer_float");
-
             }
-            else if (internalFormat == (int)GLEnum.Rgb16f || internalFormat == (int)GLEnum.Rgb32f)
+            else if (internalFormat == GLEnum.Rgb16f || internalFormat == GLEnum.Rgb32f)
             {
-
                 Trace.TraceWarning("THREE.GLRenderer: Floating point textures with RGB format not supported. Please use RGBA instead.");
-
             }
 
             return internalFormat;
@@ -277,13 +218,13 @@ namespace THREE
                 uint[] depthList = (uint[])renderTargetProperties["glDepthbuffer"];
                 for (int i = 0; i < 6; i++)
                 {
-                    if(bufferList!=null) gl.DeleteFramebuffer(bufferList[i]);
+                    if (bufferList != null) gl.DeleteFramebuffer(bufferList[i]);
                     if (depthList != null) gl.DeleteRenderbuffer(depthList[i]);
                 }
             }
             else
             {
-                if(renderTargetProperties.ContainsKey("glFramebuffer"))  gl.DeleteFramebuffer((uint)renderTargetProperties["glFramebuffer"]);
+                if (renderTargetProperties.ContainsKey("glFramebuffer")) gl.DeleteFramebuffer((uint)renderTargetProperties["glFramebuffer"]);
                 if (renderTargetProperties.ContainsKey("glDepthbuffer")) gl.DeleteRenderbuffer((uint)renderTargetProperties["glDepthbuffer"]);
             }
 
@@ -315,33 +256,20 @@ namespace THREE
 
             int textureVersion = textureProperties.ContainsKey("version") ? (int)textureProperties["version"] : -1;
 
-            if (texture.version > 0 && textureVersion != texture.version)
+            if (texture.Version > 0 && textureVersion != texture.Version)
             {
-
-                if (texture.Image == null && texture.ImageSize.Width > 0 && texture.ImageSize.Height > 0 && !(texture is DataTexture))
-                {
-                    byte[] data = new byte[texture.ImageSize.Width * texture.ImageSize.Height*4];
-                    //Bitmap bitmap = new Bitmap(texture.ImageSize.Width, texture.ImageSize.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    //BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, texture.ImageSize.Width, texture.ImageSize.Height), System.Drawing.Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-                    //IntPtr iptr = bitmapData.Scan0;
-                    //Marshal.Copy(iptr, data, 0, data.Length);
-
-                    //bitmap.UnlockBits(bitmapData);
-
-                    texture.Image = data.ToSKBitMap(texture.ImageSize.Width,texture.ImageSize.Height);
-                }
-                if (texture.Image == null && !(texture is DataTexture))
-                {
-                    Trace.TraceWarning("THREE.Renderers.gl.GLTextures.SetTexture2D : Texture marked for update but image is undefined");
-                }
-                else
+                if (texture.Image?.HasData is true)
                 {
                     UploadTexture(textureProperties, texture, slot);
                     return;
                 }
+                else
+                {
+                    throw new Exception("Texture doesn't hava data.");
+                }
             }
 
-            state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+            state.ActiveTexture(TextureUnit.Texture0 + slot);
 
             state.BindTexture((int)TextureTarget.Texture2D, (int?)(uint)textureProperties["glTexture"]);
 
@@ -351,81 +279,79 @@ namespace THREE
         {
             var textureProperties = properties.Get(texture);
 
-            if (texture.version > 0 && (int)textureProperties["version"] != texture.version)
+            if (texture.Version > 0 && (int)textureProperties["version"] != texture.Version)
             {
                 UploadTexture(textureProperties, texture, slot);
                 return;
             }
 
-            state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+            state.ActiveTexture(TextureUnit.Texture0 + slot);
             state.BindTexture((int)TextureTarget.Texture2D, (int)textureProperties["glTexture"]);
         }
 
         public void SetTexture3D(Texture texture, int slot)
         {
             var textureProperties = properties.Get(texture);
-            if (texture.version > 0 && (int)textureProperties["version"] != texture.version)
+            if (texture.Version > 0 && (int)textureProperties["version"] != texture.Version)
             {
                 UploadTexture(textureProperties, texture, slot);
                 return;
             }
 
-            state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+            state.ActiveTexture(TextureUnit.Texture0 + slot);
             state.BindTexture((int)TextureTarget.Texture3D, (int)textureProperties["glTexture"]);
 
         }
-        public void SetTextureCube(Texture texture, int slot)
+        public void SetTextureCube(CubeTexture texture, int slot)
         {
-            if (texture.Images.Length != 6) return;
+            if (texture.Images?.Length != 6) return;
 
             var textureProperties = properties.Get(texture);
 
             int textureVersion = textureProperties.ContainsKey("version") ? (int)textureProperties["version"] : -1;
 
-            if (texture.version > 0 && textureVersion != texture.version)
+            if (texture.Version > 0 && textureVersion != texture.Version)
             {
-
                 InitTexture(textureProperties, texture);
-
-                state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+                state.ActiveTexture(TextureUnit.Texture0 + slot);
                 int textureId = (int)(uint)textureProperties["glTexture"];
                 state.BindTexture((int)TextureTarget.TextureCubeMap, textureId);
 
-                //gl.PixelStore(_gl.UNPACK_FLIP_Y_WEBGL, texture.flipY );
+                var isCompressed = false; // No CompressedCubeTexture now.
+                var isDataTexture = texture.Textures != null;
 
-                var isCompressed = (texture != null && texture is CompressedTexture);
-                var isDataTexture = (texture.Images != null && texture.Images.Length > 0 && texture.Images[0] is DataTexture);
-
-                var cubeImage = new List<object>();
+                var cubeImage = new List<Image>();
 
                 for (var i = 0; i < 6; i++)
                 {
-
                     if (!isCompressed && !isDataTexture)
                     {
-
-                        cubeImage.Add(ResizeImage(texture.Images[i].Image, false, true, maxCubemapSize));
-
+                        if (texture.Images[i].Width > maxCubemapSize || texture.Images[i].Height > maxCubemapSize)
+                        {
+                            // TODO: resize
+                            throw new Exception("Too large image");
+                        }
+                        else
+                        {
+                            cubeImage.Add(texture.Images[i]);
+                        };
                     }
                     else
                     {
                         if (isDataTexture)
-                            cubeImage.Add(texture.Images[i].Image);
+                            cubeImage.Add(texture.Textures[i].Image);
                         else
                             cubeImage.Add(texture.Images[i]);
-
                     }
 
                 }
 
-                var image = cubeImage[0];
-
-                bool supportsMipsMap = image is SKBitmap ? IsPowerOfTwo((SKBitmap)image) : IsPowerOfTwo((image as Texture).Image);
+                bool supportsMipsMap = IsPowerOfTwo(cubeImage[0]);
                 bool supportsMips = supportsMipsMap ? supportsMipsMap : IsGL2;
 
                 GLEnum glFormat = utils.Convert(texture.Format);
                 GLEnum glType = utils.Convert(texture.Type);
-                int glInternalFormat = GetInternalFormat(texture.InternalFormat, (int)glFormat, (int)glType);
+                GLEnum glInternalFormat = GetInternalFormat(texture.InternalFormat, glFormat, (int)glType);
 
                 SetTextureParameters(TextureTarget.TextureCubeMap, texture, supportsMips);
 
@@ -449,81 +375,37 @@ namespace THREE
 
                 if (isCompressed)
                 {
-
-                    List<MipMap> mipmaps = null;
-
-                    for (var i = 0; i < 6; i++)
-                    {
-
-                        mipmaps = (cubeImage[i] as Texture).Mipmaps;
-
-                        for (var j = 0; j < mipmaps.Count; j++)
-                        {
-
-                            var mipmap = mipmaps[j];
-
-                            if (texture.Format != Constants.RGBAFormat && texture.Format != Constants.RGBFormat)
-                            {
-
-                                //if ( glFormat != null ) {
-
-                                state.CompressedTexImage2D((int)targets[i], j, glInternalFormat, mipmap.Width, mipmap.Height, 0, mipmap.Data);
-
-                                //} else {
-
-                                //    console.warn( 'THREE.WebGLRenderer: Attempt to load unsupported compressed texture format in .setTextureCube()' );
-
-                                //}
-
-                            }
-                            else
-                            {
-
-                                state.TexImage2D((int)targets[i], j,glInternalFormat, mipmap.Width, mipmap.Height, 0,(int)glFormat, (int)glType, mipmap.Data);
-
-                            }
-
-                        }
-
-                    }
-
-
-                    textureProperties["maxMipLevel"] = mipmaps.Count - 1;
-
+                    // No CompressedCubeTexture now.
                 }
                 else
                 {
-
                     List<MipMap> mipmaps = texture.Mipmaps;
 
                     for (var i = 0; i < 6; i++)
                     {
-                        SKBitmap localImage = cubeImage[i] as SKBitmap;
+                        var image = cubeImage[i];
                         if (isDataTexture)
                         {
-                            state.TexImage2D((int)targets[i], 0, glInternalFormat, localImage.Width, localImage.Height, 0, (int)glFormat, (int)glType, localImage.Bytes);
+                            state.TexImage2D((int)targets[i], 0, (int)glInternalFormat, image.Width, image.Height, 0, (int)glFormat, (int)glType, image.Data);
 
                             for (var j = 0; j < mipmaps.Count; j++)
                             {
                                 var mipmap = mipmaps[j];
                                 var mipmapImage = mipmap.Data;
 
-                                state.TexImage2D((int)targets[i], j + 1, glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmapImage);
+                                state.TexImage2D((int)targets[i], j + 1, (int)glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmapImage);
                             }
                         }
                         else
                         {
-
-
-                            //state.TexImage2D(targets[i], 0, (TextureComponentCount)glInternalFormat, data.Width,data.Height,0,(OpenTK.Graphics.ES30.PixelFormat)glFormat, (PixelType)glType, data.Scan0);
-                            state.TexImage2D((int)targets[i], 0, glInternalFormat, localImage.Width, localImage.Height, 0,(int)PixelFormat.BgraImg, (int)glType, localImage.Bytes);
+                            state.TexImage2D((int)targets[i], 0, (int)glInternalFormat, image.Width, image.Height, 0, (int)glFormat, (int)glType, image.Data);
 
                             for (var j = 0; j < mipmaps.Count; j++)
                             {
 
                                 var mipmap = mipmaps[j];
                                 var mipmapImage = mipmap.Data;
-                                state.TexImage2D((int)targets[i], j + 1, glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmapImage);
+                                state.TexImage2D((int)targets[i], j + 1, (int)glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmapImage);
 
                             }
                         }
@@ -538,27 +420,25 @@ namespace THREE
                 {
 
                     // We assume images for cube map have the same size.
-                    GenerateMipmap(TextureTarget.TextureCubeMap, texture, (image as SKBitmap).Width, (image as SKBitmap).Height);
+                    GenerateMipmap(TextureTarget.TextureCubeMap, texture, cubeImage[0].Width, cubeImage[0].Height);
 
                 }
 
-                textureProperties["version"] = texture.version;
+                textureProperties["version"] = texture.Version;
 
                 //if ( texture.onUpdate ) texture.onUpdate( texture );
 
             }
             else
             {
-
-                state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+                state.ActiveTexture(TextureUnit.Texture0 + slot);
                 state.BindTexture((int)TextureTarget.TextureCubeMap, (int)(uint)textureProperties["glTexture"]);
-
             }
         }
 
         public void SetTextureCubeDynamic(Texture texture, int slot)
         {
-            state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+            state.ActiveTexture(TextureUnit.Texture0 + slot);
             state.BindTexture((int)TextureTarget.TextureCubeMap, (int)(uint)properties.Get(texture)["glTexture"]);
         }
 
@@ -713,7 +593,7 @@ namespace THREE
 
             InitTexture(textureProperties, texture);
 
-            state.ActiveTexture((int)TextureUnit.Texture0 + slot);
+            state.ActiveTexture(TextureUnit.Texture0 + slot);
             state.BindTexture((int)textureType, (int)(uint)textureProperties["glTexture"]);
 
             //gl.PixelStore(PixelStoreParameter.UnPackFlipY, texture.flipY ? 1 : 0);
@@ -727,7 +607,7 @@ namespace THREE
             bool supportsMips = IsPowerOfTwo(image) ? true : IsGL2;
             GLEnum glFormat = utils.Convert(texture.Format);
             GLEnum glType = utils.Convert(texture.Type);
-            int glInternalFormat = GetInternalFormat(texture.InternalFormat, (int)glFormat, (int)glType);
+            GLEnum glInternalFormat = GetInternalFormat(texture.InternalFormat, glFormat, (int)glType);
 
             SetTextureParameters(textureType, texture, supportsMips);
 
@@ -736,22 +616,22 @@ namespace THREE
 
             if (texture is DepthTexture)
             {
-                glInternalFormat = (int)GLEnum.DepthComponent;
+                glInternalFormat = GLEnum.DepthComponent;
 
                 if (texture.Type == Constants.FloatType)
                 {
                     if (IsGL2 == false)
                         throw new Exception("Float Depth Texture only supported in WebGL2.0");
 
-                    glInternalFormat = (int)GLEnum.DepthComponent32f;
+                    glInternalFormat = GLEnum.DepthComponent32f;
                 }
                 else if (IsGL2)
                 {
 
                     // WebGL 2.0 requires signed internalformat for glTexImage2D
-                    glInternalFormat = (int)GLEnum.DepthComponent16;
+                    glInternalFormat = GLEnum.DepthComponent16;
                 }
-                if (texture.Format == Constants.DepthFormat && glInternalFormat == (int)GLEnum.DepthComponent)
+                if (texture.Format == Constants.DepthFormat && glInternalFormat == GLEnum.DepthComponent)
                 {
 
                     // The error INVALID_OPERATION is generated by texImage2D if format and internalformat are
@@ -774,7 +654,7 @@ namespace THREE
                 if (texture.Format == Constants.DepthStencilFormat)
                 {
 
-                    glInternalFormat = (int)GLEnum.DepthStencil;
+                    glInternalFormat = GLEnum.DepthStencil;
 
                     // The error INVALID_OPERATION is generated by texImage2D if format and internalformat are
                     // DEPTH_STENCIL and type is not UNSIGNED_INT_24_8_WEBgl.
@@ -790,9 +670,9 @@ namespace THREE
                     }
 
                 }
-                state.TexImage2D((int)TextureTarget.Texture2D, 0, glInternalFormat, image.Width, image.Height, 0, (int)glFormat, (int)glType, null);
+                state.TexImage2D((int)TextureTarget.Texture2D, 0, (int)glInternalFormat, image.Width, image.Height, 0, (int)glFormat, (int)glType, null);
             }
-            else if (texture is DataTexture)
+            else if (texture is DataTexture dataTexture)
             {
 
                 // use manually created mipmaps if available
@@ -806,7 +686,7 @@ namespace THREE
                     {
 
                         mipmap = mipmaps[i];
-                        state.TexImage2D((int)TextureTarget.Texture2D, i, glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmap.Data);
+                        state.TexImage2D((int)TextureTarget.Texture2D, i, (int)glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmap.Data);
 
                     }
 
@@ -816,50 +696,34 @@ namespace THREE
                 }
                 else
                 {
-                    //var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, image.PixelFormat);//System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    //state.TexImage2D(TextureTarget2d.Texture2D, 0, (TextureComponentCount)glInternalFormat, image.Width, image.Height, 0, (OpenTK.Graphics.ES30.PixelFormat)glFormat, (PixelType)glType, data.Scan0);
-                    if (texture.Image != null)
+                    if (dataTexture.Image?.HasData is true)
                     {
-                        //Bitmap image1 = (Bitmap)image.Clone();
-                        //var data = image1.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, image.PixelFormat);//System.Drawing.Imaging.PixelFormat.Format32bppArgb);                   
-                        //image1.UnlockBits(data);
-                        byte[] data = new byte[image.Width * image.Height * 4];
-                        state.TexImage2D((int)GLEnum.Texture2D, 0, glInternalFormat, image.Width, image.Height, 0, (int)PixelFormat.Bgra, (int)glType, data.ToSKBitMap(image.Width, image.Height).Bytes);
+                        switch (dataTexture.Type)
+                        {
+                            case Constants.FloatType:
+                                fixed (float* p = dataTexture.Image.FloatData)
+                                {
+                                    gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)dataTexture.Image.Width, (uint)dataTexture.Image.Height, 0, GLEnum.Rgba, glType, p);
+                                }
+                                break;
+                            case Constants.IntType:
+                                fixed (int* p = dataTexture.Image.IntData)
+                                {
+                                    gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)dataTexture.Image.Width, (uint)dataTexture.Image.Height, 0, GLEnum.Rgba, glType, p);
+                                }
+                                break;
+                            case Constants.ByteType:
+                                fixed (byte* p = dataTexture.Image.Data)
+                                {
+                                    gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)dataTexture.Image.Width, (uint)dataTexture.Image.Height, 0, GLEnum.Rgba, glType, p);
+                                }
+                                break;
+                            default:
+                                throw new Exception("Unsupported DataTexture Type");
+                        }
                         textureProperties["maxMipLevel"] = 0;
                     }
-                    else
-                    {
-                        if ((texture as DataTexture).byteData != null || (texture as DataTexture).intData != null || (texture as DataTexture).floatData != null)
-                        {
-                            switch ((texture as DataTexture).Type)
-                            {
-                                case 1015:// Constants.FloatType:
-                                    fixed (float* p = &(texture as DataTexture).floatData[0])
-                                    {
-                                        gl.TexImage2D(GLEnum.Texture2D, 0, glInternalFormat, (uint)(texture as DataTexture).ImageSize.Width, (uint)(texture as DataTexture).ImageSize.Height, 0, GLEnum.Rgba, glType, p);
-                                        textureProperties["maxMipLevel"] = 0;
-                                    }
-                                    break;
-                                case 1013: //Constants.IntType:
-                                    fixed (int* p = &(texture as DataTexture).intData[0])
-                                    {
-                                        gl.TexImage2D(GLEnum.Texture2D, 0, glInternalFormat, (uint)(texture as DataTexture).ImageSize.Width, (uint)(texture as DataTexture).ImageSize.Height, 0, GLEnum.Rgba, glType, p);
-                                        textureProperties["maxMipLevel"] = 0;
-                                    }
-                                    break;
-                                case 1010: //Constants.ByteType:
-                                    fixed (byte* p = &(texture as DataTexture).byteData[0])
-                                    {
-                                        gl.TexImage2D(GLEnum.Texture2D, 0, glInternalFormat, (uint)(texture as DataTexture).ImageSize.Width, (uint)(texture as DataTexture).ImageSize.Height, 0, GLEnum.Rgba, glType, p);
-                                        textureProperties["maxMipLevel"] = 0;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-
                 }
-
             }
             else if (texture is CompressedTexture)
             {
@@ -875,7 +739,7 @@ namespace THREE
                         if (glFormat != null)
                         {
 
-                            state.CompressedTexImage2D((int)GLEnum.Texture2D, i, glInternalFormat, mipmap.Width, mipmap.Height, 0, mipmap.Data);
+                            state.CompressedTexImage2D((int)GLEnum.Texture2D, i, (int)glInternalFormat, mipmap.Width, mipmap.Height, 0, mipmap.Data);
 
                         }
                         else
@@ -889,7 +753,7 @@ namespace THREE
                     else
                     {
 
-                        state.TexImage2D((int)GLEnum.Texture2D, i, glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmap.Data);
+                        state.TexImage2D((int)GLEnum.Texture2D, i, (int)glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmap.Data);
 
                     }
 
@@ -901,20 +765,19 @@ namespace THREE
             else if (texture is DataTexture2DArray)
             {
 
-                state.TexImage3D((int)GLEnum.Texture2DArray, 0, glInternalFormat, (texture as DataTexture2DArray).Width, (texture as DataTexture2DArray).Height, (texture as DataTexture2DArray).Depth, 0, (int)glFormat, (int)glType, (texture as DataTexture2DArray).Data);
+                state.TexImage3D((int)GLEnum.Texture2DArray, 0, (int)glInternalFormat, (texture as DataTexture2DArray).Width, (texture as DataTexture2DArray).Height, (texture as DataTexture2DArray).Depth, 0, (int)glFormat, (int)glType, (texture as DataTexture2DArray).Data);
                 textureProperties["maxMipLevel"] = 0;
 
             }
             else if (texture is DataTexture3D)
             {
 
-                state.TexImage3D((int)GLEnum.Texture3D, 0, glInternalFormat, (texture as DataTexture3D).Width, (texture as DataTexture3D).Height, (texture as DataTexture3D).Depth, 0, (int)glFormat, (int)glType, (texture as DataTexture3D).Data);
+                state.TexImage3D((int)GLEnum.Texture3D, 0, (int)glInternalFormat, (texture as DataTexture3D).Width, (texture as DataTexture3D).Height, (texture as DataTexture3D).Depth, 0, (int)glFormat, (int)glType, (texture as DataTexture3D).Data);
                 textureProperties["maxMipLevel"] = 0;
 
             }
             else
             {
-
                 // regular Texture (image, video, canvas)
 
                 // use manually created mipmaps if available
@@ -923,64 +786,48 @@ namespace THREE
 
                 if (mipmaps.Count > 0 && supportsMips)
                 {
-
                     for (var i = 0; i < mipmaps.Count; i++)
                     {
-
                         mipmap = mipmaps[i];
-                        state.TexImage2D((int)GLEnum.Texture2D, i, glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmap.Data);
-
-
+                        state.TexImage2D((int)GLEnum.Texture2D, i, (int)glInternalFormat, mipmap.Width, mipmap.Height, 0, (int)glFormat, (int)glType, mipmap.Data);
                     }
 
                     texture.GenerateMipmaps = false;
                     textureProperties["maxMipLevel"] = mipmaps.Count - 1;
-
                 }
                 else
                 {
-
-                    //image.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-                    //var data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, image.PixelFormat);//System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                    //state.TexImage2D(TextureTarget2d.Texture2D, 0, (TextureComponentCount)glInternalFormat, image.Width, image.Height, 0, (OpenTK.Graphics.ES30.PixelFormat)glType, PixelType.UnsignedByte, data.Scan0);
-                    //state.TexImage2D(TextureTarget2d.Texture2D, 0, TextureComponentCount.Rgba, image.Width, image.Height, 0, OpenTK.Graphics.ES30.PixelFormat.Rgba, PixelType.UnsignedByte, data.Scan0);
-                    //OpenTK.Graphics.Opengl.gl.TexImage2D(OpenTK.Graphics.Opengl.TextureTarget.Texture2D,
-                    //    0,
-                    //    OpenTK.Graphics.Opengl.PixelInternalFormat.Rgb,
-                    //    data.Width,
-                    //    data.Height,
-                    //    0,
-                    //    OpenTK.Graphics.Opengl.PixelFormat.Bgra,
-                    //    OpenTK.Graphics.Opengl.PixelType.UnsignedByte,
-                    //    data.Scan0);
-                    byte[] bytes = image.Bytes;
-                    fixed (byte* p = bytes)
+                    if (image != null)
                     {
-                        gl.TexImage2D(GLEnum.Texture2D, 0, glInternalFormat, (uint)image.Width, (uint)image.Height, 0, (GLEnum)32993, glType, p);
-                        textureProperties["maxMipLevel"] = 0;
+                        byte[] bytes = image.Data;
+                        fixed (byte* p = bytes)
+                        {
+                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)image.Width, (uint)image.Height, 0, glInternalFormat, glType, p);
+                            textureProperties["maxMipLevel"] = 0;
+                        }
                     }
-                    //image.UnlockBits(data);
-
-                    //byte[] pixels = image.GetTextureImage();
-                    //state.TexImage2D(TextureTarget2d.Texture2D, 0, (TextureComponentCount)glInternalFormat, image.Width, image.Height, 0, (OpenTK.Graphics.ES30.PixelFormat)glType, PixelType.UnsignedByte, pixels);
-
-                   
-
-
+                    else if (texture.Image?.Data is byte[] bytes)
+                    {
+                        fixed (byte* p = bytes)
+                        {
+                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)texture.Image.Width, (uint)texture.Image.Height, 0, glInternalFormat, glType, p);
+                            textureProperties["maxMipLevel"] = 0;
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Texture does not have data.");
+                    }
                 }
 
             }
 
             if (TextureNeedsGenerateMipmaps(texture, supportsMips))
             {
-
                 GenerateMipmap(textureType, texture, image.Width, image.Height);
-
             }
 
-            textureProperties["version"] = texture.version;
-            //if ( texture.onUpdate ) texture.onUpdate( texture );
+            textureProperties["version"] = texture.Version;
         }
 
         public unsafe void SetupFrameBufferTexture(int framebuffer, GLRenderTarget renderTarget, GLEnum attachment, GLEnum textureTarget)
@@ -988,13 +835,13 @@ namespace THREE
 
             var glFormat = utils.Convert(renderTarget.Texture.Format);
             var glType = utils.Convert(renderTarget.Texture.Type);
-            var glInternalFormat = GetInternalFormat(renderTarget.Texture.InternalFormat, (int)glFormat, (int)glType);
+            var glInternalFormat = GetInternalFormat(renderTarget.Texture.InternalFormat, glFormat, (int)glType);
 
             int target = (int)textureTarget;
             byte[] emptyData = Array.Empty<byte>();
-            fixed(byte *ptr = emptyData)
+            fixed (byte* ptr = emptyData)
             {
-                gl.TexImage2D((GLEnum)target, 0, glInternalFormat, (uint)renderTarget.Width, (uint)renderTarget.Height, 0, (PixelFormat)glFormat, (PixelType)glType, ptr);
+                gl.TexImage2D((GLEnum)target, 0, (int)glInternalFormat, (uint)renderTarget.Width, (uint)renderTarget.Height, 0, (PixelFormat)glFormat, (PixelType)glType, ptr);
             }
             //state.TexImage2D((int)(int)target, 0, glInternalFormat, renderTarget.Width, renderTarget.Height, 0, (int)glFormat, (int)glType, IntPtr.Zero);
             int texture = (int)(uint)properties.Get(renderTarget.Texture)["glTexture"];
@@ -1055,14 +902,14 @@ namespace THREE
 
                 var glFormat = utils.Convert(renderTarget.Texture.Format);
                 var glType = utils.Convert(renderTarget.Texture.Type);
-                var glInternalFormat = GetInternalFormat(renderTarget.Texture.InternalFormat, (int)glFormat, (int)glType);
+                var glInternalFormat = GetInternalFormat(renderTarget.Texture.InternalFormat, glFormat, (int)glType);
 
                 if (isMultisample)
                 {
 
                     var samples = GetRenderTargetSamples(renderTarget);
 
-                    gl.RenderbufferStorageMultisample(GLEnum.Renderbuffer,(uint)samples, (GLEnum)glInternalFormat,(uint) renderTarget.Width, (uint)renderTarget.Height);
+                    gl.RenderbufferStorageMultisample(GLEnum.Renderbuffer, (uint)samples, (GLEnum)glInternalFormat, (uint)renderTarget.Width, (uint)renderTarget.Height);
 
                 }
                 else
@@ -1093,12 +940,12 @@ namespace THREE
 
             // upload an empty depth texture with framebuffer size
             if (properties.Get(renderTarget.depthTexture)["glTexture"] != null ||
-                    renderTarget.depthTexture.ImageSize.Width != renderTarget.Width ||
-                    renderTarget.depthTexture.ImageSize.Height != renderTarget.Height)
+                    renderTarget.depthTexture.Image.Width != renderTarget.Width ||
+                    renderTarget.depthTexture.Image.Height != renderTarget.Height)
             {
 
-                renderTarget.depthTexture.ImageSize.Width = renderTarget.Width;
-                renderTarget.depthTexture.ImageSize.Height = renderTarget.Height;
+                renderTarget.depthTexture.Image.Width = renderTarget.Width;
+                renderTarget.depthTexture.Image.Height = renderTarget.Height;
                 renderTarget.depthTexture.NeedsUpdate = true;
 
             }
@@ -1153,7 +1000,7 @@ namespace THREE
                     {
 
                         gl.BindFramebuffer(GLEnum.Framebuffer, (uint)framebuffer[i]);
-                        depthbuffer[i] =(int) gl.GenRenderbuffer();
+                        depthbuffer[i] = (int)gl.GenRenderbuffer();
                         SetupRenderBufferStorage(depthbuffer[i], renderTarget, false);
 
                     }
@@ -1184,7 +1031,7 @@ namespace THREE
             {
                 //if (!this.Context.IsDisposed)
                 //{
-                    DeallocateRenderTarget(renderTarget);
+                DeallocateRenderTarget(renderTarget);
                 //}
 
             };
@@ -1234,9 +1081,9 @@ namespace THREE
                         gl.BindRenderbuffer(GLEnum.Renderbuffer, (uint)renderTargetProperties["glColorRenderbuffer"]);
                         var glFormat = utils.Convert(renderTarget.Texture.Format);
                         var glType = utils.Convert(renderTarget.Texture.Type);
-                        var glInternalFormat = GetInternalFormat(renderTarget.Texture.InternalFormat, (int)glFormat, (int)glType);
+                        var glInternalFormat = GetInternalFormat(renderTarget.Texture.InternalFormat, glFormat, (int)glType);
                         var samples = GetRenderTargetSamples(renderTarget);
-                        gl.RenderbufferStorageMultisample(GLEnum.Renderbuffer, (uint)samples, (GLEnum)glInternalFormat, (uint)renderTarget.Width,(uint)renderTarget.Height);
+                        gl.RenderbufferStorageMultisample(GLEnum.Renderbuffer, (uint)samples, (GLEnum)glInternalFormat, (uint)renderTarget.Width, (uint)renderTarget.Height);
 
                         gl.BindFramebuffer(GLEnum.Framebuffer, (uint)renderTargetProperties["glMultisampledFramebuffer"]);
                         gl.FramebufferRenderbuffer(GLEnum.Framebuffer, GLEnum.ColorAttachment0, GLEnum.Renderbuffer, (uint)renderTargetProperties["glColorRenderbuffer"]);
@@ -1414,40 +1261,26 @@ namespace THREE
 
         public void SafeSetTextureCube(Texture texture, int slot)
         {
-            if (texture != null && texture is GLCubeRenderTarget)
+            if (texture is GLCubeRenderTarget)
             {
-
                 if (warnedTextureCube == false)
                 {
-
                     Trace.TraceWarning("THREE.WebGLTextures.safeSetTextureCube: don't use cube render targets as textures. Use their .texture property instead.");
                     warnedTextureCube = true;
-
                 }
 
                 texture = (texture as GLCubeRenderTarget).Texture;
-
+                SetTextureCubeDynamic(texture, slot);
             }
-
-            // currently relying on the fact that WebGLRenderTargetCube.texture is a Texture and NOT a CubeTexture
-            // TODO: unify these code paths
-            if ((texture != null && texture is CubeTexture) ||
-                (texture.Images != null && texture.Images.Length == 6))
+            else if (texture is CubeTexture cubeTexture)
             {
-
-                // CompressedTexture can have Array in image :/
-
-                // this function alone should take care of cube textures
-                SetTextureCube(texture, slot);
-
+                SetTextureCube(cubeTexture, slot);
             }
             else
             {
-
-                // assumed: texture property of THREE.WebGLRenderTargetCube
                 SetTextureCubeDynamic(texture, slot);
-
             }
+
         }
     }
 }

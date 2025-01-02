@@ -291,9 +291,10 @@ namespace THREE
 
         public IGLStencilBuffer stencil { get; set; }
     }
+
     public class GLState : DisposableObject, IGLState
     {
-        
+
         public IGLStateBuffer buffers { get; set; } = new GLStateBuffer();
 
         private static Hashtable enabledCapabilities = new Hashtable();
@@ -369,7 +370,7 @@ namespace THREE
         private int maxTextures;
 
         public GL gl;
-        public GLState(GL gl,GLExtensions extensions, GLUtils utils, GLCapabilities capabilities)
+        public GLState(GL gl, GLExtensions extensions, GLUtils utils, GLCapabilities capabilities)
         {
             this.gl = gl;
             this.maxVertexAttributes = gl.GetInteger(GetPName.MaxVertexAttribs);
@@ -794,11 +795,10 @@ namespace THREE
                 Disable((int)EnableCap.ScissorTest);
         }
 
-        public void ActiveTexture(int? glSlot = null)
+        public void ActiveTexture(TextureUnit? glSlot = null)
         {
-            if (glSlot == null) glSlot = (int)TextureUnit.Texture0 + maxTextures - 1;
-
-            if (currentTexturesSlot != glSlot)
+            glSlot ??= TextureUnit.Texture0 + maxTextures - 1;
+            if (currentTexturesSlot != (int)glSlot)
             {
                 TextureUnit unit = (TextureUnit)Enum.ToObject(typeof(TextureUnit), glSlot);
                 //if (glSlot > 34015)
@@ -808,7 +808,7 @@ namespace THREE
                 //}
                 gl.ActiveTexture(unit);
 
-                currentTexturesSlot = glSlot;
+                currentTexturesSlot = (int)glSlot;
             }
         }
 
@@ -930,10 +930,18 @@ namespace THREE
             depthBuffer.Reset();
             stencilBuffer.Reset();
         }
+
+        public void ResetCachedStates()
+        {
+            currentBoundTextures.Clear();
+        }
+
         public override void Dispose()
         {
             Reset();
             base.Dispose();
         }
+
+        void IGLState.ActiveTexture(int? glSlot) => ActiveTexture((TextureUnit?)glSlot);
     }
 }

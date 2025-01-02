@@ -1,8 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using THREE.Renderers.Shaders;
+﻿using THREE.Textures;
 
 namespace THREE
 {
@@ -15,15 +11,13 @@ namespace THREE
         float curF = 0.0f;
         int randX = 0;
         Random random = new Random();
-        public GlitchPass(float? dt_size = null) : base()
+        public GlitchPass(int dt_size = 64) : base()
         {
             var shader = new DigitalGlitch();
 
             uniforms = UniformsUtils.CloneUniforms(shader.Uniforms);
 
-            if (dt_size == null) dt_size = 64;
-            if (dt_size != null && dt_size.Value == 0) dt_size = 64;
-            (uniforms["tDisp"] as GLUniform)["value"] = GenerateHeightmap(dt_size.Value);
+            (uniforms["tDisp"] as GLUniform)["value"] = GenerateHeightmap(dt_size);
 
             this.material = new ShaderMaterial
             {
@@ -104,29 +98,27 @@ namespace THREE
             this.randX = random.Next(120, 240);
         }
 
-        private DataTexture GenerateHeightmap(float dt_size)
+        private DataTexture GenerateHeightmap(int dt_size)
         {
-            var data_arr = new byte[(int)(dt_size * dt_size * 3)];
+            var data_arr = new float[(dt_size * dt_size)];
             var length = dt_size * dt_size;
 
             for (var i = 0; i < length; i++)
             {
-
-                var val = (byte)(random.NextDouble() * 255);
-                data_arr[i * 3 + 0] = val;
-                data_arr[i * 3 + 1] = val;
-                data_arr[i * 3 + 2] = val;
-
+                data_arr[i] = (float)random.NextDouble();
             }
-            //Bitmap bitmap = new Bitmap((int)dt_size, (int)dt_size, PixelFormat.Format32bppArgb);
-            //BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, (int)dt_size, (int)dt_size), System.Drawing.Imaging.ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            //IntPtr iptr = bitmapData.Scan0;
 
-            //Marshal.Copy(iptr, data_arr, 0, data_arr.Length);
-
-            //bitmap.UnlockBits(bitmapData);
-            var bitmap = data_arr.ToSKBitMap((int)dt_size,(int)dt_size);
-            return new DataTexture(bitmap, (int)dt_size, (int)dt_size, Constants.RGBAFormat, Constants.ByteType);
+            return new DataTexture
+            {
+                Image = new Image
+                {
+                    Width = dt_size,
+                    Height = dt_size,
+                    FloatData = data_arr,
+                },
+                Format = Constants.RedFormat,
+                Type = Constants.FloatType,
+            };
         }
     }
 }

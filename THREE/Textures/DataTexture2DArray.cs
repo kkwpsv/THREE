@@ -19,7 +19,7 @@
 
             this.GenerateMipmaps = false;
 
-            this.flipY = false;
+            this.FlipY = false;
 
             this.NeedsUpdate = true;
         }

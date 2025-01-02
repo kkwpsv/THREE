@@ -2,7 +2,6 @@
 
 namespace THREE
 {
-    [Serializable]
     public class GLCubeMap
     {
         public GLRenderer renderer;

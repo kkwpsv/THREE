@@ -1,31 +1,24 @@
-﻿using SkiaSharp;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using THREE.Textures;
 
 namespace THREE
 {
-    [Serializable]
     public class CubeTextureLoader
     {
-        public CubeTextureLoader()
-        {
-
-        }
         public static CubeTexture Load(List<string> filePath)
         {
-            CubeTexture texture = new CubeTexture();
+            if (filePath.Count != 6)
+            {
+                throw new Exception("File count should be 6");
+            }
+            var images = new Image[6];
             for (int i = 0; i < filePath.Count; i++)
             {
-                SKBitmap bitmap = SKBitmap.Decode(filePath[i]);
-                //bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-                Texture image = new Texture();
-                image.Image = bitmap;
-                image.Format = Constants.RGBFormat;
-                image.NeedsUpdate = true;
-
-                texture.Images[i] = image;
+                images[i] = TextureLoader.LoadImage(filePath[i], StbImageSharp.ColorComponents.RedGreenBlueAlpha);
             }
+            CubeTexture texture = new CubeTexture
+            {
+                Images = images,
+            };
             texture.NeedsUpdate = true;
             return texture;
         }

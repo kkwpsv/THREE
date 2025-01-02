@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using THREE.Textures;
 
 namespace THREE
 {
@@ -55,13 +56,25 @@ namespace THREE
             ScissorTest = false;
             Viewport = new Vector4(0, 0, width, height);
 
-            this.Texture = new Texture(null, null, (int?)Options["wrapS"], (int?)Options["wrapT"], (int?)Options["magFilter"], (int?)Options["minFilter"], (int?)Options["format"], (int?)Options["type"], (int?)Options["anisotropy"], (int?)Options["encoding"]);
+            Texture = new Texture();
 
-            this.Texture.ImageSize.Width = width;
-            this.Texture.ImageSize.Height = height;
+            Texture.Image = new Image
+            {
+                Width = Width,
+                Height = Height,
+            };
 
-            this.Texture.GenerateMipmaps = Options["generateMipmaps"] != null ? (bool)Options["generateMipmaps"] : false;
-            this.Texture.MinFilter = Options["minFilter"] != null ? (int)Options["minFilter"] : Constants.LinearFilter;
+            Texture.WrapS = (int?)Options["wrapS"] ?? Constants.ClampToEdgeWrapping;
+            Texture.WrapT = (int?)Options["wrapT"] ?? Constants.ClampToEdgeWrapping;
+            Texture.MagFilter = (int?)Options["magFilter"] ?? Constants.LinearFilter;
+            Texture.MinFilter = (int?)Options["minFilter"] ?? Constants.LinearMipmapLinearFilter;
+            Texture.Format = (int?)Options["format"] ?? Constants.RGBAFormat;
+            Texture.InternalFormat = null;
+            Texture.Type = (int?)Options["type"] ?? Constants.UnsignedByteType;
+            Texture.Anisotropy = (int?)Options["anisotropy"] ?? 1;
+            Texture.Encoding = (int?)Options["encoding"] ?? Constants.LinearEncoding;
+
+            Texture.GenerateMipmaps = Options["generateMipmaps"] != null ? (bool)Options["generateMipmaps"] : false;
 
             this.depthBuffer = Options["depthBuffer"] != null ? (bool)Options["depthBuffer"] : true;
             this.stencilBuffer = Options["stencilBuffer"] != null ? (bool)Options["stencilBuffer"] : true;
@@ -97,8 +110,8 @@ namespace THREE
                 this.Width = width;
                 this.Height = height;
 
-                this.Texture.ImageSize.Width = width;
-                this.Texture.ImageSize.Height = height;
+                this.Texture.Image.Width = width;
+                this.Texture.Image.Height = height;
 
             }
         }

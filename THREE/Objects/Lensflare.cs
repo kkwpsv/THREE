@@ -1,7 +1,5 @@
-﻿using SkiaSharp;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using THREE.Textures;
 
 namespace THREE
 {
@@ -107,7 +105,7 @@ namespace THREE
 
         RawShaderMaterial material1a, material1b, material2;
 
-        DataTexture tempMap, occlusionMap;
+        FramebufferTexture tempMap, occlusionMap;
 
         Mesh mesh1, mesh2;
 
@@ -132,21 +130,9 @@ namespace THREE
             var positionView = new Vector3();
 
             // textures
-            tempMap = new DataTexture(new SKBitmap(16, 16), 16, 16, Constants.RGBAFormat, Constants.UnsignedByteType);
-            tempMap.ImageSize.Width = 16;
-            tempMap.ImageSize.Height = 16;
-            tempMap.MinFilter = Constants.NearestFilter;
-            tempMap.MagFilter = Constants.NearestFilter;
-            tempMap.WrapS = Constants.ClampToEdgeWrapping;
-            tempMap.WrapT = Constants.ClampToEdgeWrapping;
+            tempMap = new FramebufferTexture(16, 16);
 
-            occlusionMap = new DataTexture(new SKBitmap(16, 16), 16, 16, Constants.RGBAFormat, Constants.UnsignedByteType);
-            occlusionMap.ImageSize.Width = 16;
-            occlusionMap.ImageSize.Height = 16;
-            occlusionMap.MinFilter = Constants.NearestFilter;
-            occlusionMap.MagFilter = Constants.NearestFilter;
-            occlusionMap.WrapS = Constants.ClampToEdgeWrapping;
-            occlusionMap.WrapT = Constants.ClampToEdgeWrapping;
+            occlusionMap = new FramebufferTexture(16, 16);
 
             material1a = new RawShaderMaterial()
             {
@@ -162,24 +148,12 @@ namespace THREE
                     void main() {
                         gl_Position = vec4( position.xy * scale + screenPosition.xy, screenPosition.z, 1.0 );
                     }
-
-
-
-
-
-             
                     ",
                 FragmentShader = @"
                     precision highp float;
                     void main() {
                         gl_FragColor = vec4( 1.0, 0.0, 1.0, 1.0 );
                     }
-
-
-
-
-
-
                     ",
                 DepthTest = true,
                 DepthWrite = false,
@@ -204,14 +178,7 @@ namespace THREE
                     void main() {
                         vUV = uv;
                         gl_Position = vec4( position.xy * scale + screenPosition.xy, screenPosition.z, 1.0 );
-                    }
-
-
-
-
-
-
-                
+                    }     
                     ",
                 FragmentShader = @"
                     precision highp float;
@@ -220,13 +187,6 @@ namespace THREE
                     void main() {
                         gl_FragColor = texture2D( map, vUV );
                     }
-
-
-
-
-
-
-
                     ",
                 DepthTest = false,
                 DepthWrite = false,

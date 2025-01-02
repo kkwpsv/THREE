@@ -1,8 +1,4 @@
-﻿using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using THREE.Textures;
 
 namespace THREE
 {
@@ -29,150 +25,82 @@ namespace THREE
     }
 
     [Serializable]
-    public class Texture : DisposableObject,ICloneable
+    public class Texture : DisposableObject, ICloneable
     {
         #region Static Fields
 
-        protected static int TextureIdCount;
+        private static int TextureIdCount;
 
         #endregion
 
         #region Fields
 
-        public int Id = TextureIdCount++;
+        public int Id { get; } = TextureIdCount++;
 
-        public Guid Uuid = Guid.NewGuid();
+        public Guid Uuid { get; } = Guid.NewGuid();
 
-        public string Name = "";
+        public string Name { get; set; } = "";
 
-        public Size Resolution { get; protected set; } // this fields are not existed in three.js
+        public Image? Image { get; set; }
 
-        //public TextureTarget TextureTarget { get; private set; }// this fields are not existed in three.js
+        public List<MipMap> Mipmaps { get; set; } = new List<MipMap>();
 
-        public int TextureAddress { get; protected set; }
+        public int Mapping { get; set; } = Constants.UVMapping;
 
+        public int WrapS { get; set; } = Constants.ClampToEdgeWrapping;
+        public int WrapT { get; set; } = Constants.ClampToEdgeWrapping;
+        public int WrapR { get; set; }
 
-        public SKBitmap Image;
+        public int MagFilter { get; set; } = Constants.LinearFilter;
+        public int MinFilter { get; set; } = Constants.LinearMipMapLinearFilter;
+        public int MaxFilter { get; set; }
 
-        public Texture[] Images = new Texture[] { null, null, null, null, null, null };
+        public float Anisotropy { get; set; } = 1;
 
-        public List<MipMap> Mipmaps = new List<MipMap>();
+        public int Format { get; set; } = Constants.RGBAFormat;
 
-        public Size ImageSize;
+        public int Type { get; set; } = Constants.UnsignedByteType;
 
-        public int Mapping = Constants.UVMapping;
-
-        public int WrapS;
-        public int WrapT;
-        public int WrapR;
-
-        public int MagFilter;
-        public int MinFilter;
-        public int MaxFilter;
-
-        public float Anisotropy;
-
-        public int Format = (int)Constants.RGBAFormat;
-        public int Type;
-
-        public Vector2 Offset = new Vector2(0, 0);
-        public Vector2 Repeat = new Vector2(1, 1);
-        public Vector2 Center = new Vector2(0, 0);
-        public float Rotation = 0;
+        public Vector2 Offset { get; set; } = new Vector2(0, 0);
+        public Vector2 Repeat { get; set; } = new Vector2(1, 1);
+        public Vector2 Center { get; set; } = new Vector2(0, 0);
+        public float Rotation { get; set; } = 0;
 
         public bool MatrixAutoUpdate = true;
-        public Matrix3 Matrix = new Matrix3();
+        public Matrix3 Matrix { get; set; } = new Matrix3();
 
-        public bool GenerateMipmaps = true;
-        public bool PremultiplyAlpha = false;
-        public bool flipY = true;
-        public int UnpackAlignment = 4;
+        public bool GenerateMipmaps { get; set; } = true;
+        public bool PremultiplyAlpha { get; set; } = false;
+        public bool FlipY { get; set; } = false; // seem to not work now
+        public int UnpackAlignment { get; set; } = 4;
 
-        private bool needsUpdate;
+        private bool _needsUpdate;
 
         public bool NeedsUpdate
         {
-            get { return needsUpdate; }
+            get { return _needsUpdate; }
             set
             {
-                needsUpdate = value;
-                if (value == true) version++;
+                _needsUpdate = value;
+                if (value == true) Version++;
             }
         }
 
-        public string InternalFormat = null;
+        public string? InternalFormat { get; set; } = null;
 
-        public int Encoding = Constants.LinearEncoding;
+        public int Encoding { get; set; } = Constants.LinearEncoding;
 
-        public int version = 0;
-
-        public string SourceFilePath;
-
+        public int Version { get; private set; } = 0;
 
         private readonly int defaultMapping = Constants.UVMapping;
 
-        public bool NeedsFlipEnvMap = false;
+        public bool NeedsFlipEnvMap { get; set; } = false;
         #endregion
-
-
-        //public bool __glInit = false;
-
-        //public int __glTexture { get; set; }
-
-        //public int __version;
 
         #region Constructors and Destructors
 
         public Texture()
         {
-            this.Anisotropy = 1;
-
-            this.WrapS = (int)Constants.ClampToEdgeWrapping;
-
-            this.WrapT = (int)Constants.ClampToEdgeWrapping;
-
-            this.MagFilter = (int)Constants.LinearFilter;
-
-            this.MinFilter = (int)Constants.LinearMipMapLinearFilter;
-
-            this.Type = (int)Constants.UnsignedByteType;
-
-        }
-
-        //public Texture(string bitmapPath, bool flipY = true)
-        //{
-        //    this.SourceFilePath = bitmapPath;
-
-        //    using (var bitmap = Bitmap.FromFile(bitmapPath) as Bitmap)
-        //    {
-        //        HandleLoadingBitmapData(bitmap, flipY);
-        //    }
-        //}
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public Texture(SKBitmap image = null, int? mapping = null, int? wrapS = null, int? wrapT = null, int? magFilter = null, int? minFilter = null, int? format = null, int? type = null, int? anisotropy = null, int? encoding = null)
-            : this()
-        {
-
-            this.Image = image;
-
-            this.Mapping = mapping != null ? (int)mapping : this.defaultMapping;
-
-            this.WrapS = wrapS != null ? (int)wrapS : Constants.ClampToEdgeWrapping;
-            this.WrapT = wrapT != null ? (int)wrapT : Constants.ClampToEdgeWrapping;
-
-            this.MagFilter = magFilter != null ? (int)magFilter : Constants.LinearFilter;
-            this.MinFilter = minFilter != null ? (int)minFilter : Constants.LinearMipmapLinearFilter;
-
-            this.Anisotropy = anisotropy != null ? (int)anisotropy : 1;
-
-            this.Format = format != null ? (int)format : Constants.RGBAFormat;
-            this.InternalFormat = null;
-            this.Type = type != null ? (int)type : Constants.UnsignedByteType;
-
-            this.Encoding = encoding != null ? (int)encoding : Constants.LinearEncoding;
-
         }
 
         /// <summary>
@@ -181,17 +109,6 @@ namespace THREE
         /// <param name="other"></param>
         protected Texture(Texture other) : this()
         {
-            this.Image = other.Image;
-            //this.Image = other.Image!=null ? (Bitmap)other.Image.Clone() : null;
-
-            this.ImageSize = other.ImageSize;
-            this.Images = other.Images;
-            //if(other.Images.Length>0)
-            //{
-            //    for (int i = 0; i < other.Images.Length; i++)
-            //        this.Images[i] = other.Images[i] != null ? (Texture)other.Images[i].Clone() : null;
-            //}
-
             this.Mipmaps = other.Mipmaps;
             //this.Mipmaps = other.Mipmaps.Select(item => (MipMap)item.Clone()).ToList();
 
@@ -211,14 +128,14 @@ namespace THREE
 
             this.Encoding = other.Encoding;
 
-            this.version = other.version;
+            this.Version = other.Version;
         }
 
         #endregion
 
         public void UpdateMatrix()
         {
-            this.Matrix.SetUvTransform(this.Offset.X, this.Offset.Y, this.Repeat.X, this.Repeat.Y, this.Rotation, this.Center.X, this.Center.Y);
+            Matrix.SetUvTransform(Offset.X, Offset.Y, Repeat.X, Repeat.Y, Rotation, Center.X, Center.Y);
         }
 
         public virtual object Clone()

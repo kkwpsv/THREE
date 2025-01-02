@@ -147,13 +147,13 @@ namespace THREE
 
                 var texture = background is GLCubeRenderTarget ? (background as GLCubeRenderTarget).Texture : background;
 
-                if (currentBackground != background || (!(texture is Color) && currentBackgroundVersion != (texture as CubeTexture).version)
+                if (currentBackground != background || (!(texture is Color) && currentBackgroundVersion != (texture as CubeTexture).Version)
                     || (currentTonemapping != null && currentTonemapping.Value != renderer.ToneMapping))
                 {
                     BoxMesh.Material.NeedsUpdate = true;
 
                     currentBackground = background;
-                    currentBackgroundVersion = (texture as CubeTexture).version;
+                    currentBackgroundVersion = (texture as CubeTexture).Version;
                     currentTonemapping = renderer.ToneMapping;
                 }
 
@@ -195,13 +195,13 @@ namespace THREE
 
                 (PlaneMesh.Material as ShaderMaterial).Uniforms["uvTransform"] = new GLUniform { { "value", (background as Texture).Matrix } };
 
-                if (currentBackground != background || currentBackgroundVersion != (background as Texture).version
+                if (currentBackground != background || currentBackgroundVersion != (background as Texture).Version
                     || (currentTonemapping != null && currentTonemapping.Value != renderer.ToneMapping))
                 {
                     PlaneMesh.Material.NeedsUpdate = true;
 
                     currentBackground = background;
-                    currentBackgroundVersion = (background as Texture).version;
+                    currentBackgroundVersion = (background as Texture).Version;
                     currentTonemapping = renderer.ToneMapping;
                 }
 

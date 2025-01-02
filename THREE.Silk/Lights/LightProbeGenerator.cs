@@ -1,10 +1,5 @@
 ﻿using Silk.NET.OpenGLES;
-using System;
 using System.Diagnostics;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using Color = THREE.Color;
-using Vector3 = THREE.Vector3;
 
 namespace THREE
 {
@@ -32,27 +27,12 @@ namespace THREE
 
                 var image = cubeTexture.Images[faceIndex];
 
-                var width = image.Image.Width;
-                var height = image.Image.Height;
+                var width = image.Width;
+                var height = image.Height;
 
-                //BitmapData imageData = image.Image.LockBits(new System.Drawing.Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, image.Image.PixelFormat);
+                var pixelSize = 2.0f / width;
 
-
-                var imageWidth = image.Image.Width; // assumed to be square
-
-                var pixelSize = 2.0f / imageWidth;
-
-                //var data = new byte[imageData.Height * imageData.Stride];
-
-                //try
-                //{
-                //    Marshal.Copy(imageData.Scan0, data, 0, data.Length);
-                //}
-                //finally
-                //{
-                //    image.Image.UnlockBits(imageData);
-                //}
-                byte[] data = image.Image.Bytes;
+                byte[] data = image.Data;
                 for (var i = 0; i < data.Length; i += 4)
                 { // RGBA assumed
 
@@ -66,9 +46,9 @@ namespace THREE
 
                     var pixelIndex = i / 4.0f;
 
-                    var col = -1 + (pixelIndex % imageWidth + 0.5f) * pixelSize;
+                    var col = -1 + (pixelIndex % width + 0.5f) * pixelSize;
 
-                    var row = 1 - (float)(Math.Floor((float)pixelIndex / imageWidth) + 0.5f) * pixelSize;
+                    var row = 1 - (float)(Math.Floor((float)pixelIndex / width) + 0.5f) * pixelSize;
 
                     switch (faceIndex)
                     {
