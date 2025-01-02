@@ -42,13 +42,13 @@ namespace THREE
 
             this.IsGL2 = capabilities.IsGL2;
 
-            this.maxTextures = capabilities.maxTextures;
+            this.maxTextures = capabilities.MaxTextures;
 
-            this.maxCubemapSize = capabilities.maxCubemapSize;
+            this.maxCubemapSize = capabilities.MaxCubemapSize;
 
-            this.maxTextureSize = capabilities.maxTextureSize;
+            this.maxTextureSize = capabilities.MaxTextureSize;
 
-            this.maxSample = capabilities.maxSamples;
+            this.maxSample = capabilities.MaxSamples;
 
             this.properties = properties;
 
@@ -549,17 +549,15 @@ namespace THREE
                 }
             }
 
-            var extension = extensions.Get("GL_EXT_texture_filter_anisotropic");
-
-            if (extension > -1)
+            if (extensions.Get("GL_EXT_texture_filter_anisotropic"))
             {
 
-                if (texture.Type == Constants.FloatType && extensions.Get("GL_OES_texture_float_linear") == -1) return;
-                if (texture.Type == Constants.HalfFloatType && (IsGL2 || extensions.Get("GL_OES_texture_half_float_linear") == -1)) return;
+                if (texture.Type == Constants.FloatType && extensions.Get("GL_OES_texture_float_linear")) return;
+                if (texture.Type == Constants.HalfFloatType && (IsGL2 || extensions.Get("GL_OES_texture_half_float_linear"))) return;
 
                 if (texture.Anisotropy > 1 || (properties.Get(texture) as Hashtable)["currentAnisotropy"] != null)
                 {
-                    gl.TexParameter(textureType, (GLEnum)2, System.Math.Min(texture.Anisotropy, capabilities.GetMaxAnisotropy()));
+                    gl.TexParameter(textureType, (GLEnum)2, System.Math.Min(texture.Anisotropy, capabilities.MaxAnisotropy));
                     (properties.Get(texture))["currentAnisotropy"] = texture.Anisotropy;
                 }
 
@@ -802,7 +800,7 @@ namespace THREE
                         byte[] bytes = image.Data;
                         fixed (byte* p = bytes)
                         {
-                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)image.Width, (uint)image.Height, 0, glInternalFormat, glType, p);
+                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)image.Width, (uint)image.Height, 0, glFormat, glType, p);
                             textureProperties["maxMipLevel"] = 0;
                         }
                     }
@@ -810,7 +808,7 @@ namespace THREE
                     {
                         fixed (byte* p = bytes)
                         {
-                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)texture.Image.Width, (uint)texture.Image.Height, 0, glInternalFormat, glType, p);
+                            gl.TexImage2D(GLEnum.Texture2D, 0, (int)glInternalFormat, (uint)texture.Image.Width, (uint)texture.Image.Height, 0, glFormat, glType, p);
                             textureProperties["maxMipLevel"] = 0;
                         }
                     }

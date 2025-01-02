@@ -48,7 +48,7 @@ namespace THREE
 
                 if (Capabilities.IsGL2) return GLEnum.HalfFloat;
 
-                if (Extensions.ExtensionsName.Contains("GL_ARB_texture_half_float")) //'OES_texture_half_float'
+                if (Extensions.Get("GL_ARB_texture_half_float")) //'OES_texture_half_float'
                     return GLEnum.HalfFloat;
 
             }
@@ -121,7 +121,7 @@ namespace THREE
             if (p == Constants.RGB_ETC1_Format)
             {
 
-                if (Extensions.ExtensionsName.Contains("GL_ARB_compressed_texture_etc1"))
+                if (Extensions.Get("GL_ARB_compressed_texture_etc1"))
                     return GLEnum.CompressedRgb8Etc2;
             }
 
@@ -132,7 +132,7 @@ namespace THREE
                 p == Constants.RGBA_ASTC_12x10_Format || p == Constants.RGBA_ASTC_12x12_Format)
             {
 
-                if (Extensions.ExtensionsName.Contains("GL_ARB_compressed_texture_astc"))
+                if (Extensions.Get("GL_ARB_compressed_texture_astc"))
                     return GLEnum.CompressedTextureFormats;
 
 
@@ -149,7 +149,7 @@ namespace THREE
 
                 }
 
-                if (Extensions.ExtensionsName.Contains("GL_EXT_blend_minmax"))
+                if (Extensions.Get("GL_EXT_blend_minmax"))
                 {
 
                     if (p == Constants.MinEquation) return GLEnum.Min;
@@ -164,7 +164,7 @@ namespace THREE
 
                 if (Capabilities.IsGL2) return GLEnum.UnsignedInt248;
 
-                if (Extensions.ExtensionsName.Contains("GL_ARB_depth_texture"))
+                if (Extensions.Get("GL_ARB_depth_texture"))
                     return GLEnum.UnsignedInt248;
             }
             return 0;

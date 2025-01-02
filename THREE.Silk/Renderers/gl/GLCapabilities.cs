@@ -1,4 +1,5 @@
 ﻿using Silk.NET.OpenGLES;
+using Silk.NET.OpenGLES.Extensions.EXT;
 using System;
 using System.Linq;
 
@@ -19,91 +20,78 @@ namespace THREE
     {
         public bool IsGL2;
 
-        public string precision;
+        public string Precision { get; }
 
-        public bool logarithmicDepthBuffer;
+        public bool logarithmicDepthBuffer { get; }
 
-        public int maxTextures;
+        public int MaxTextures { get; }
 
-        public int maxVertexTextures;
+        public int MaxVertexTextures { get; }
 
-        public int maxTextureSize;
+        public int MaxTextureSize { get; }
 
-        public int maxCubemapSize;
+        public int MaxCubemapSize { get; }
 
-        public int maxAttributes;
+        public int MaxAttributes { get; }
 
-        public int maxVertexUniforms;
+        public int MaxVertexUniforms { get; }
 
-        public int maxVaryings;
+        public int MaxVaryings { get; }
 
-        public int maxFragmentUniforms;
+        public int MaxFragmentUniforms { get; }
 
-        public bool vertexTextures;
+        public bool VertexTextures { get; }
 
-        public bool floatFragmentTextures;
+        public bool FloatFragmentTextures { get; }
 
-        public bool floatVertexTextures;
+        public bool FloatVertexTextures { get; }
 
-        public float maxAnisotropy;
+        public float MaxAnisotropy { get; }
 
-        public int maxSamples;
+        public int MaxSamples { get; }
 
-        private GLExtensions Extensions;
-        GL gl;
-        public GLCapabilities(GLExtensions Extensions, ref GLCapabilitiesParameters parameters)
+        private readonly GLExtensions _extensions;
+        private readonly GL _gl;
+
+        public GLCapabilities(GLExtensions extensions, ref GLCapabilitiesParameters parameters)
         {
-            this.IsGL2 = Extensions.Get("GL_ARB_ES3_compatibility") > -1 ? true : false;
-            this.gl = Extensions.GL;
-            //this.IsGL2 = false;
+            IsGL2 = true;
+            _gl = extensions.GL;
 
-            this.Extensions = Extensions;
+            _extensions = extensions;
 
-            if (parameters.precision != null)
-                this.precision = parameters.precision;
-            else
-                this.precision = "highp";
+            Precision = parameters.precision != null ? parameters.precision : "highp";
 
-            string maxPrecision = GetMaxPrecision(this.precision);
+            string maxPrecision = GetMaxPrecision(this.Precision);
 
-            if (!maxPrecision.Equals(this.precision))
+            if (!maxPrecision.Equals(this.Precision))
             {
-                this.precision = maxPrecision;
+                Precision = maxPrecision;
             }
 
-            //this.logarithmicDepthBuffer = parameters.logarithmicDepthBuffer == true;
+            MaxTextures = _gl.GetInteger(GetPName.MaxTextureImageUnits);
+            MaxVertexTextures = _gl.GetInteger(GetPName.MaxVertexTextureImageUnits);
+            MaxTextureSize = _gl.GetInteger(GetPName.MaxTextureSize);
+            MaxCubemapSize = _gl.GetInteger(GetPName.MaxCubeMapTextureSize);
+            MaxAttributes = _gl.GetInteger(GetPName.MaxVertexAttribs);
+            MaxVertexUniforms = _gl.GetInteger(GetPName.MaxVertexUniformVectors);
+            MaxVaryings = _gl.GetInteger(GetPName.MaxVaryingVectors);
+            MaxFragmentUniforms = _gl.GetInteger(GetPName.MaxFragmentUniformVectors);
 
-            gl.GetInteger(GetPName.MaxTextureImageUnits, out this.maxTextures);
-            gl.GetInteger(GetPName.MaxVertexTextureImageUnits, out this.maxVertexTextures);
-            gl.GetInteger(GetPName.MaxTextureSize, out this.maxTextureSize);
-            gl.GetInteger(GetPName.MaxCubeMapTextureSize, out this.maxCubemapSize);
-            gl.GetInteger(GetPName.MaxVertexAttribs, out this.maxAttributes);
-            gl.GetInteger(GetPName.MaxVertexUniformVectors, out this.maxVertexUniforms);
-            gl.GetInteger(GetPName.MaxVaryingVectors, out this.maxVaryings);
-            gl.GetInteger(GetPName.MaxFragmentUniformVectors, out this.maxFragmentUniforms);
+            VertexTextures = MaxVertexTextures > 0;
+            FloatFragmentTextures = true;
+            FloatVertexTextures = VertexTextures && FloatFragmentTextures;
 
-            this.vertexTextures = this.maxVertexTextures > 0;
-            this.floatFragmentTextures = this.IsGL2 || Extensions.ExtensionsName.Contains("GL_ARB_texture_float");
-            this.floatVertexTextures = this.vertexTextures && this.floatFragmentTextures;
+            MaxSamples = _gl.GetInteger(GLEnum.MaxSamples);
 
-            gl.GetInteger(GLEnum.MaxSamples, out this.maxSamples);
-
-            this.maxSamples = IsGL2 ? this.maxSamples : 0;
-
-        }
-
-        public float GetMaxAnisotropy()
-        {
-
-            if (this.Extensions.ExtensionsName.Contains("GL_ARB_texture_filter_anisotropic"))
+            if (_extensions.Get("GL_EXT_texture_filter_anisotropic"))
             {
-                //gl.GetFloat((GetPName)ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt, out this.maxAnisotropy);
+                MaxAnisotropy = _gl.GetFloat((GetPName)EXT.MaxTextureMaxAnisotropyExt);
             }
             else
-                this.maxAnisotropy = 0;
-
-            return this.maxAnisotropy;
-
+            {
+                MaxAnisotropy = 0;
+            }
         }
 
         public string GetMaxPrecision(string precision)
@@ -111,8 +99,8 @@ namespace THREE
             if (precision.Equals("highp"))
             {
                 int range, value1, value2;
-                gl.GetShaderPrecisionFormat(ShaderType.VertexShader, GLEnum.HighFloat, out range, out value1);
-                gl.GetShaderPrecisionFormat(ShaderType.FragmentShader, GLEnum.HighFloat, out range, out value2);
+                _gl.GetShaderPrecisionFormat(ShaderType.VertexShader, GLEnum.HighFloat, out range, out value1);
+                _gl.GetShaderPrecisionFormat(ShaderType.FragmentShader, GLEnum.HighFloat, out range, out value2);
 
                 if (value1 > 0 && value2 > 0)
                 {
@@ -123,8 +111,8 @@ namespace THREE
             if (precision.Equals("mediump"))
             {
                 int range, value1, value2;
-                gl.GetShaderPrecisionFormat(ShaderType.VertexShader, GLEnum.MediumFloat, out range, out value1);
-                gl.GetShaderPrecisionFormat(ShaderType.FragmentShader, GLEnum.MediumFloat, out range, out value2);
+                _gl.GetShaderPrecisionFormat(ShaderType.VertexShader, GLEnum.MediumFloat, out range, out value1);
+                _gl.GetShaderPrecisionFormat(ShaderType.FragmentShader, GLEnum.MediumFloat, out range, out value2);
 
                 if (value1 > 0 && value2 > 0)
                 {

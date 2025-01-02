@@ -12,7 +12,7 @@ namespace THREE
     public class GLRenderer : DisposableObject, IGLRenderer
     {
         public GL gl { get; set; }
-        public bool IsGL2 { get; set; }
+        public bool IsGL2 { get; private set; }
 
         public IWindow Context;
 
@@ -320,6 +320,7 @@ namespace THREE
             this.extensions = new GLExtensions(gl);
             this.parameters = new GLCapabilitiesParameters();
             this.capabilities = new GLCapabilities(extensions, ref parameters);
+            IsGL2 = capabilities.IsGL2;
 
             this._viewport.Set(0, 0, this.Width, this.Height);
             this._scissor.Set(0, 0, this.Width, this.Height);
@@ -1178,7 +1179,7 @@ namespace THREE
 
             Multiview = new GLMultiview(this);
 
-            ShadowMap = new GLShadowMap(this, objects, this.capabilities.maxTextureSize);
+            ShadowMap = new GLShadowMap(this, objects, this.capabilities.MaxTextureSize);
         }
 
         public Vector4 GetCurrentViewport(Vector4 target)
@@ -1635,7 +1636,7 @@ namespace THREE
 
                     var bones = skeleton.Bones;
 
-                    if (capabilities.floatVertexTextures)
+                    if (capabilities.FloatVertexTextures)
                     {
 
                         if (skeleton.BoneTexture != null) skeleton.ComputeBoneTexture();

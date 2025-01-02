@@ -311,7 +311,7 @@ namespace THREE
                     rectAreaList.Add(uniforms);
 
                     rectAreaLength++;
-   
+
                 }
                 else if (light is PointLight)
                 {
@@ -396,7 +396,7 @@ namespace THREE
                 else
                 {
                     //WebGL1
-                    if (extension.Get("OES_texture_float_linear") > -1)
+                    if (extension.Get("OES_texture_float_linear"))
                     {
                         if (UniformsLib.LTC_FLOAT_1 != null)
                         {
@@ -407,7 +407,7 @@ namespace THREE
                             state["rectAreaLTC2"] = UniformsLib.LTC_FLOAT_2;
                         }
                     }
-                    else if (extension.Get("OES_texture_half_float_linear") > -1)
+                    else if (extension.Get("OES_texture_half_float_linear"))
                     {
                         if (UniformsLib.LTC_HALF_1 != null)
                         {
@@ -482,7 +482,7 @@ namespace THREE
 
             Matrix4 viewMatrix = camera.MatrixWorldInverse;
 
-            for (int i = 0;i< lights.Count; i++)
+            for (int i = 0; i < lights.Count; i++)
             {
 
                 Light light = lights[i];

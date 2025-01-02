@@ -34,8 +34,6 @@ namespace THREE
 
         private int maxVertexAttributes;
 
-        private bool isGL2;
-
         private Hashtable bindingStates = new Hashtable();
 
         public BindingStateStruct defaultState;
@@ -59,7 +57,7 @@ namespace THREE
             this.attributes = attributes;
             this.capabilities = capabilities;
 
-           gl.GetInteger(GetPName.MaxVertexAttribs, out maxVertexAttributes);
+            gl.GetInteger(GetPName.MaxVertexAttribs, out maxVertexAttributes);
 
             vaoAvailable = capabilities.IsGL2;
 
@@ -69,7 +67,7 @@ namespace THREE
         }
         ~GLBindingStates()
         {
-     
+
             Reset();
             foreach (int geometryId in bindingStates.Keys)
             {
@@ -414,10 +412,14 @@ namespace THREE
         }
         private void vertexAttribPointer(int index, int size, GLEnum type, bool normalized, int stride, int offset)
         {
-            if (isGL2 && (type == GLEnum.Int || type == GLEnum.UnsignedInt))
-                gl.VertexAttribIPointer((uint)index, size, type, (uint) stride, IntPtr.Zero);
+            if (type == GLEnum.Int || type == GLEnum.UnsignedInt)
+            {
+                gl.VertexAttribIPointer((uint)index, size, type, (uint)stride, IntPtr.Zero);
+            }
             else
+            {
                 gl.VertexAttribPointer((uint)index, size, type, normalized, (uint)stride, offset);
+            }
         }
 
         private void setupVertexAttributes(Object3D object3D, Material material, GLProgram program, Geometry geometry)
@@ -567,7 +569,7 @@ namespace THREE
                         enableAttributeAndDivisor(programAttribute + 2, 1);
                         enableAttributeAndDivisor(programAttribute + 3, 1);
 
-                        gl.BindBuffer(GLEnum.ArrayBuffer,(uint) buffer);
+                        gl.BindBuffer(GLEnum.ArrayBuffer, (uint)buffer);
 
                         gl.VertexAttribPointer((uint)programAttribute + 0, 4, type, false, 64, 0);
                         gl.VertexAttribPointer((uint)programAttribute + 1, 4, type, false, 64, 16);

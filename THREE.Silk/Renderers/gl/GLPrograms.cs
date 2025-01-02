@@ -42,8 +42,8 @@ namespace THREE
         public GLPrograms(GLRenderer renderer, GLCubeMap cubeMaps, GLExtensions extension, GLCapabilities capabilities, GLBindingStates bindingStates, GLClipping clipping)
         {
 
-            this.maxVertexUniforms = capabilities.maxVertexUniforms;
-            this.vertexTextures = capabilities.vertexTextures;
+            this.maxVertexUniforms = capabilities.MaxVertexUniforms;
+            this.vertexTextures = capabilities.VertexTextures;
 
             this.capabilities = capabilities;
             this.renderer = renderer;
@@ -55,9 +55,9 @@ namespace THREE
 
             this.isGL2 = capabilities.IsGL2;
             this.logarithmicDepthBuffer = capabilities.logarithmicDepthBuffer;
-            this.floatVertexTextures = capabilities.floatVertexTextures;
+            this.floatVertexTextures = capabilities.FloatVertexTextures;
 
-            this.precision = capabilities.precision;
+            this.precision = capabilities.Precision;
 
             shaderIDs.Add("MeshDepthMaterial", "depth");
             shaderIDs.Add("MeshDistanceMaterial", "distanceRGBA");
@@ -268,7 +268,7 @@ namespace THREE
 
             parameters.Add("transmissionMap", material.TransmissionMap != null);
 
-            parameters.Add("thicknessMap",material.ThicknessMap!=null);            
+            parameters.Add("thicknessMap", material.ThicknessMap != null);
 
             parameters.Add("vertexTangents", (material.NormalMap != null && material.VertexTangents));
 
@@ -352,12 +352,11 @@ namespace THREE
 
             parameters.Add("extensionShaderTextureLOD", (material is ShaderMaterial) && (material as ShaderMaterial).extensions.shaderTextureLOD);
 
-            parameters.Add("rendererExtensionFragDepth", isGL2 || extensions.Get("EXT_frag_depth") > -1);
+            parameters.Add("rendererExtensionFragDepth", isGL2 || extensions.Get("GL_EXT_frag_depth"));
 
+            parameters.Add("rendererExtensionDrawBuffers", isGL2 || extensions.Get("GL_EXT_draw_buffers"));
 
-            parameters.Add("rendererExtensionDrawBuffers", isGL2 || extensions.Get("GL_draw_buffers") > -1);
-
-            parameters.Add("rendererExtensionShaderTextureLOD", isGL2 || extensions.Get("EXT_shader_texture_lod") > -1);
+            parameters.Add("rendererExtensionShaderTextureLOD", isGL2 || extensions.Get("GL_EXT_shader_texture_lod"));
 
             parameters.Add("customProgramCacheKey", material.customProgramCacheKey);
 
@@ -420,7 +419,7 @@ namespace THREE
 
             if (!string.IsNullOrEmpty(shaderId))
             {
-                var  shader = (GLShader)ShaderLib[shaderId];
+                var shader = (GLShader)ShaderLib[shaderId];
                 uniforms = (GLUniforms)shader.Uniforms.Clone();
             }
             else

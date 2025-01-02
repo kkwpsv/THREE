@@ -43,9 +43,7 @@ namespace THREE
         public bool IsAvailable()
         {
             available = false;
-            var extension = extensions.Get("GL_OVR_multiview2");
-
-            if (extension != -1)
+            if (extensions.Get("GL_OVR_multiview2"))
             {
                 available = true;
                 maxNumViews = renderer.gl.GetInteger(GetPName.MaxViewportDims);

@@ -6,7 +6,7 @@ namespace THREE
 {
     public interface IGLRenderer
     {
-        bool IsGL2 { get; set; }
+        bool IsGL2 { get; }
         bool AutoClear { get; set; }
         bool AutoClearColor { get; set; }
         bool AutoClearDepth { get; set; }
@@ -20,10 +20,10 @@ namespace THREE
         void SetClearAlpha(float alpha);
         void ClearDepth();
         Vector2 GetSize(Vector2 target = null);
-        float GetPixelRatio();       
+        float GetPixelRatio();
         Vector4 GetCurrentViewport(Vector4 target);
         GLRenderTarget GetRenderTarget();
-        void SetRenderTarget(GLRenderTarget target,int? activeCubeFace=null, int? activeMipmapLevel=null);
+        void SetRenderTarget(GLRenderTarget target, int? activeCubeFace = null, int? activeMipmapLevel = null);
         void Render(Object3D scene, Camera camera);
         void RenderBufferDirect(Camera camera, Object3D scene, Geometry geometry, Material material, Object3D object3D, DrawRange? group);
         void ReadRenderTargetPixels(GLRenderTarget renderTarget, float x, float y, int width, int height, byte[] buffer, int? activeCubeFaceIndex);
